@@ -2,16 +2,18 @@
 #include <black_fly_lib.hpp>
 
 int main() {
-  cv::VideoCapture cap(0); // Open the default camera (index 0)
 
-  if (!cap.isOpened()) {
-    std::cout << "Failed to open the camera." << std::endl;
-    return -1;
-  }
+    // Create a BlackFlyCamera object
+    bfc::BlackFlyCamera cam;
+
+    // Set the camera to continuous acquisition mode
+    cam.set_continuous_acquisition();
+
+
 
   while (true) {
     cv::Mat frame;
-    cap.read(frame); // Read a new frame from the camera
+    frame = cam.get_frame(); // Read a new frame from the camera
 
     if (frame.empty()) {
       std::cout << "Failed to capture a frame." << std::endl;
@@ -25,7 +27,6 @@ int main() {
       break;
   }
 
-  cap.release(); // Release the video capture object
   cv::destroyAllWindows(); // Close all windows
 
   return 0;

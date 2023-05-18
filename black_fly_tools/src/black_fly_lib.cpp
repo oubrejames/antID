@@ -2,7 +2,6 @@
 #include <black_fly_lib.hpp>
 
 namespace bfc{
-
 // Create a BlackFlyCamera constructer 
 BlackFlyCamera::BlackFlyCamera(){
     system = Spinnaker::System::GetInstance();
