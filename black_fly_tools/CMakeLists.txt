@@ -10,16 +10,16 @@ project(black_fly_tools)
 
 add_executable(main src/main.cpp)
 
-# # create the library
-# add_library(black_fly_tools)
+# create the library
+add_library(black_fly_tools src/black_fly_lib.cpp)
 
-# # The add_library function just added turtlelib as a "target"
-# # A "target" is a name that CMake uses to refer to some type of output
-# # In this case it is a library but it could also be an executable or some other items
-# target_link_libraries(main black_fly_tools)
+# The add_library function just added turtlelib as a "target"
+# A "target" is a name that CMake uses to refer to some type of output
+# In this case it is a library but it could also be an executable or some other items
+target_link_libraries(main black_fly_tools)
 
 # enable C++ 17
-target_compile_features(main PUBLIC cxx_std_17) 
+target_compile_features(black_fly_tools PUBLIC cxx_std_17) 
 
 # Generate doxygen documentation
 # find_package(Doxygen)
@@ -28,9 +28,29 @@ target_compile_features(main PUBLIC cxx_std_17)
 
 find_package(Spinnaker REQUIRED)
 include_directories(${Spinnaker_INCLUDE_DIRS})
-target_link_libraries(main ${Spinnaker_LIBRARIES})
+target_link_libraries(black_fly_tools ${Spinnaker_LIBRARIES})
 
 find_package(OpenCV REQUIRED)
-target_link_libraries(main ${OpenCV_LIBS})
+target_link_libraries(black_fly_tools ${OpenCV_LIBS})
 
-target_compile_options(main PUBLIC -Wall -Wextra -Wpedantic)
+# target_compile_options(main PUBLIC -Wall -Wextra -Wpedantic)
+
+
+# Public include directories can be used by other targets that link against turtlelib
+# By adding include/ to the include path, this means that files in e.g., include/turtlelib
+# can be included with #include"turtlelib/file.hpp"
+target_include_directories(black_fly_tools
+  PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+
+# warnings are your friend!
+target_compile_options(black_fly_tools PUBLIC -Wall -Wextra -Wpedantic)
+
+install(DIRECTORY include/black_fly_tools DESTINATION include)
+install(TARGETS main black_fly_tools EXPORT black_fly_tools-targets)
+
+install(EXPORT black_fly_tools-targets
+  FILE black_fly_tools-config.cmake
+  NAMESPACE black_fly_tools::
+  DESTINATION lib/cmake/${PROJECT_NAME})
