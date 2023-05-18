@@ -16,11 +16,11 @@ class BlackFlyCamera
         Spinnaker::SystemPtr system;
         Spinnaker::CameraList camList;
         Spinnaker::CameraPtr pCam;
-        
+
     public:
         BlackFlyCamera();
         ~BlackFlyCamera();
-        
+
         Spinnaker::ImagePtr pResultImage;
 
         int set_continuous_acquisition();
