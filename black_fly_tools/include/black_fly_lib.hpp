@@ -16,22 +16,21 @@ class BlackFlyCamera
         Spinnaker::SystemPtr system;
         Spinnaker::CameraList camList;
         Spinnaker::CameraPtr pCam;
+        Spinnaker::ImageProcessor processor;
+        Spinnaker::GenApi::CFloatPtr ptrExposuretime;
+        Spinnaker::GenApi::CFloatPtr ptrFPS;
 
     public:
         BlackFlyCamera();
         ~BlackFlyCamera();
 
+        
         Spinnaker::ImagePtr pResultImage;
 
-        int set_continuous_acquisition();
         cv::Mat get_frame();
-        
-        /*
-        Gonna have to think about this more but I want this class to:
-            1) Set up the camera object
-            2) Make sure the camera is set to continuous acquisition
-            3) Output frames in opencv format
-        */
+
+        void initialize_camera();
+
 };
 }
 #endif

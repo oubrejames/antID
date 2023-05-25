@@ -8,7 +8,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 # find the c and c++ compilers
 project(black_fly_tools)
 
-add_executable(main src/main.cpp)
+add_executable(stream src/stream.cpp)
+add_executable(record src/record.cpp)
 
 # create the library
 add_library(black_fly_tools src/black_fly_lib.cpp)
@@ -16,7 +17,8 @@ add_library(black_fly_tools src/black_fly_lib.cpp)
 # The add_library function just added turtlelib as a "target"
 # A "target" is a name that CMake uses to refer to some type of output
 # In this case it is a library but it could also be an executable or some other items
-target_link_libraries(main black_fly_tools)
+target_link_libraries(stream black_fly_tools)
+target_link_libraries(record black_fly_tools)
 
 # enable C++ 17
 target_compile_features(black_fly_tools PUBLIC cxx_std_17) 
@@ -45,12 +47,12 @@ target_include_directories(black_fly_tools
   $<INSTALL_INTERFACE:include>)
 
 # warnings are your friend!
-target_compile_options(black_fly_tools PUBLIC -Wall -Wextra -Wpedantic)
-
+# target_compile_options(black_fly_tools PUBLIC -Wall -Wextra -Wpedantic)
+target_compile_options(black_fly_tools PRIVATE -Wno-system-headers)
 
 
 install(DIRECTORY include/black_fly_tools DESTINATION include)
-install(TARGETS main black_fly_tools EXPORT black_fly_tools-targets)
+install(TARGETS stream record black_fly_tools EXPORT black_fly_tools-targets)
 
 install(EXPORT black_fly_tools-targets
   FILE black_fly_tools-config.cmake

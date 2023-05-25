@@ -4,66 +4,72 @@
 namespace bfc{
 // Create a BlackFlyCamera constructer 
 BlackFlyCamera::BlackFlyCamera(){
-    system = Spinnaker::System::GetInstance();
-    camList = system->GetCameras();
-    pCam = nullptr;
+    try{
+        // Create system instance
+        system = Spinnaker::System::GetInstance();
+
+        // Retrieve list of cameras from the system
+        camList = system->GetCameras();
+
+        // Ensure there are cameras plugged in
+        if (camList.GetSize() == 0)
+        {
+            std::cout << "No cameras found." << std::endl;
+        }
+
+        // Get camera instance
+        pCam = camList.GetByIndex(0);
+        pCam->Init();
+
+        // Retrieve camera FPS and display
+        ptrFPS = pCam->GetNodeMap().GetNode("FrameRate");
+        std::cout << "HEY" << std::endl;
+        // std::cout << "Camera FPS: " << ptrFPS->GetValue() << std::endl;
+
+        // Retrieve and display exposure time
+        ptrExposuretime = pCam->GetNodeMap().GetNode("ExposureTime");
+        float exposure_time = ptrExposuretime->GetValue();
+        auto unit = ptrExposuretime->GetUnit();
+        std::cout << "Exposure time " << exposure_time << " " << unit << std::endl;
+
+        // Set processing to HQ linear (color)
+        // processor.SetColorProcessing(Spinnaker::SPINNAKER_COLOR_PROCESSING_ALGORITHM_HQ_LINEAR);
+    }
+    catch (Spinnaker::Exception& e)
+    {
+        std::cout << "Error: " << e.what() << std::endl;
+    }
 }
 
 // Create a BlackFlyCamera destructor
 BlackFlyCamera::~BlackFlyCamera(){
+    if(pCam->IsStreaming())
+        pCam->EndAcquisition();
     pResultImage->Release();
     camList.Clear();
     system->ReleaseInstance();
 }
 
-int BlackFlyCamera::set_continuous_acquisition(){
-        std::cout << "Inside set continuous" << std::endl;
-        // Retrieve TL device nodemap and print device information
-        
-        std::cout << "Cameras Detected " << camList.GetSize() << std::endl;
-        Spinnaker::GenApi::INodeMap & nodeMapTLDevice = pCam->GetTLDeviceNodeMap();
-        std::cout << "Node Map TL Device" << std::endl;
-
-        Spinnaker::GenApi::INodeMap & nodeMap = pCam->GetNodeMap();
-        std::cout << "nodeMap" << std::endl;
-
-        Spinnaker::GenApi::CEnumerationPtr ptrAcquisitionMode = nodeMap.GetNode("AcquisitionMode");
-        // if (!Spinnaker::GenApi::IsAvailable(ptrAcquisitionMode) || !Spinnaker::GenApi::IsWritable(ptrAcquisitionMode))
-        // {
-        //     std::cout << "Unable to set acquisition mode to continuous (enum retrieval). Aborting..." << std::endl << std::endl;
-        //     return -1;
-        // }
-        if (!Spinnaker::GenApi::IsReadable(ptrAcquisitionMode) ||
-            !Spinnaker::GenApi::IsWritable(ptrAcquisitionMode))
-        {
-            std::cout << "Unable to set acquisition mode to continuous (enum retrieval). Aborting..." << std::endl << std::endl;
-            return -1;
-        }
-        // // Retrieve entry node from enumeration node
-        // Spinnaker::GenApi::CEnumEntryPtr ptrAcquisitionModeContinuous = ptrAcquisitionMode->GetEntryByName("Continuous");
-        // if (!Spinnaker::GenApi::IsAvailable(ptrAcquisitionModeContinuous) || !Spinnaker::GenApi::IsReadable(ptrAcquisitionModeContinuous))
-        // {
-        //     std::cout << "Unable to set acquisition mode to continuous (entry retrieval). Aborting..." << std::endl << std::endl;
-        //     return -1;
-        // }
-        // Retrieve entry node from enumeration node
-        Spinnaker::GenApi::CEnumEntryPtr ptrAcquisitionModeContinuous = ptrAcquisitionMode->GetEntryByName("Continuous");
-        if (!Spinnaker::GenApi::IsReadable(ptrAcquisitionModeContinuous))
-        {
-            std::cout << "Unable to set acquisition mode to continuous (entry retrieval). Aborting..." << std::endl << std::endl;
-            return -1;
-        }
-        // Retrieve integer value from entry node
-        const int64_t acquisitionModeContinuous = ptrAcquisitionModeContinuous->GetValue();
-
-        // Set integer value from entry node as new value of enumeration node
-        ptrAcquisitionMode->SetIntValue(acquisitionModeContinuous);
+void BlackFlyCamera::initialize_camera(){
+    // pCam->ExposureTimeSelector();
+    // set_continuous_acquisition();
+    pCam->BeginAcquisition();
 }
 
 cv::Mat BlackFlyCamera::get_frame(){
-    pCam = camList.GetByIndex(0);
-    pResultImage = pCam->GetNextImage();
-    cv::Mat frame = cv::Mat(pResultImage->GetHeight(), pResultImage->GetWidth(), (pResultImage->GetNumChannels() == 3) ? CV_8UC3 : CV_8UC1, pResultImage->GetData(), pResultImage->GetStride());
+    Spinnaker::ImageProcessor processor;
+    processor.SetColorProcessing(Spinnaker::SPINNAKER_COLOR_PROCESSING_ALGORITHM_HQ_LINEAR);
+
+    pResultImage = pCam->GetNextImage(1000);
+
+    Spinnaker::ImagePtr color_im = processor.Convert(pResultImage, Spinnaker::PixelFormat_BGR8);
+    // cv::Mat frame = cv::Mat(pResultImage->GetHeight(), pResultImage->GetWidth(), (pResultImage->GetNumChannels() == 3) ? CV_8UC3 : CV_8UC1, pResultImage->GetData(), pResultImage->GetStride());
+    cv::Mat frame = cv::Mat(color_im->GetHeight(), color_im->GetWidth(), (color_im->GetNumChannels() == 3) ? CV_8UC3 : CV_8UC1, color_im->GetData(), color_im->GetStride());
+
+    pResultImage->Release();
     return frame;
 }
+
+
+
 }
