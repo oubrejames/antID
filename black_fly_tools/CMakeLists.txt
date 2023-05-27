@@ -3,7 +3,8 @@
 cmake_minimum_required(VERSION 3.22.1)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
-
+# set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "Installation directory")
+message("CMAKE_INSTALL_PREFIX" ${CMAKE_INSTALL_PREFIX})
 # project_name sets the name of the project and causes cmake to
 # find the c and c++ compilers
 project(black_fly_tools)
@@ -51,10 +52,35 @@ target_include_directories(black_fly_tools
 target_compile_options(black_fly_tools PRIVATE -Wno-system-headers)
 
 
-install(DIRECTORY include/black_fly_tools DESTINATION include)
-install(TARGETS stream record black_fly_tools EXPORT black_fly_tools-targets)
+# install(DIRECTORY include/black_fly_tools DESTINATION include)
+# install(TARGETS stream record black_fly_tools EXPORT black_fly_tools-targets)
 
+# install(EXPORT black_fly_tools-targets
+#   FILE black_fly_tools-config.cmake
+#   NAMESPACE black_fly_tools::
+#   DESTINATION lib/cmake/${PROJECT_NAME})
+
+###################
+# The install(TARGETS ...) command specifies the installation destinations for the targets (stream, 
+# record, and black_fly_tools). The executables will be installed to the bin directory, and the 
+# library files (lib) will be installed to the lib directory.
+install(TARGETS black_fly_tools
+        EXPORT black_fly_tools-targets
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+)
+
+# The install(DIRECTORY ...) command is used to install the header files located in the 
+# include/black_fly_tools directory to the include directory.
+install(DIRECTORY include/black_fly_tools
+        DESTINATION include
+)
+#  install(EXPORT ...) command generates the export file black_fly_tools-config.cmake and installs 
+# it to the lib/cmake/${PROJECT_NAME} directory. This file allows other projects to import and use 
+# the black_fly_tools target as a dependency.
 install(EXPORT black_fly_tools-targets
-  FILE black_fly_tools-config.cmake
-  NAMESPACE black_fly_tools::
-  DESTINATION lib/cmake/${PROJECT_NAME})
+        FILE black_fly_tools-config.cmake
+        NAMESPACE black_fly_tools::
+        DESTINATION lib/cmake/${PROJECT_NAME}
+)

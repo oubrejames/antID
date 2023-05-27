@@ -1,5 +1,5 @@
 #include "Spinnaker.h"
-#include <black_fly_lib.hpp>
+#include <black_fly_tools/black_fly_lib.hpp>
 
 namespace bfc{
 // Create a BlackFlyCamera constructer 

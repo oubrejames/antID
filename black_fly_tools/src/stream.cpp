@@ -1,5 +1,5 @@
 #include <opencv2/opencv.hpp>
-#include <black_fly_lib.hpp>
+#include <black_fly_tools/black_fly_lib.hpp>
 #include "Spinnaker.h"
 #include "SpinVideo.h"
 
