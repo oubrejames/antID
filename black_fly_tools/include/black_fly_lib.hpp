@@ -24,13 +24,15 @@ class BlackFlyCamera
         BlackFlyCamera();
         ~BlackFlyCamera();
 
-        
         Spinnaker::ImagePtr pResultImage;
 
         cv::Mat get_frame();
 
-        void initialize_camera();
+        void begin_acquisition();
 
+        void set_exposure_time(float exposure_time);
+
+        void set_auto_exposure(const Spinnaker::GenICam::gcstring& val);
 };
 }
 #endif

@@ -23,17 +23,13 @@ BlackFlyCamera::BlackFlyCamera(){
 
         // Retrieve camera FPS and display
         ptrFPS = pCam->GetNodeMap().GetNode("FrameRate");
-        std::cout << "HEY" << std::endl;
-        // std::cout << "Camera FPS: " << ptrFPS->GetValue() << std::endl;
+        std::cout << "Camera FPS: " << ptrFPS->GetValue() << std::endl;
 
         // Retrieve and display exposure time
         ptrExposuretime = pCam->GetNodeMap().GetNode("ExposureTime");
         float exposure_time = ptrExposuretime->GetValue();
         auto unit = ptrExposuretime->GetUnit();
         std::cout << "Exposure time " << exposure_time << " " << unit << std::endl;
-
-        // Set processing to HQ linear (color)
-        // processor.SetColorProcessing(Spinnaker::SPINNAKER_COLOR_PROCESSING_ALGORITHM_HQ_LINEAR);
     }
     catch (Spinnaker::Exception& e)
     {
@@ -45,12 +41,12 @@ BlackFlyCamera::BlackFlyCamera(){
 BlackFlyCamera::~BlackFlyCamera(){
     if(pCam->IsStreaming())
         pCam->EndAcquisition();
-    pResultImage->Release();
+    // pResultImage->Release();
     camList.Clear();
     system->ReleaseInstance();
 }
 
-void BlackFlyCamera::initialize_camera(){
+void BlackFlyCamera::begin_acquisition(){
     // pCam->ExposureTimeSelector();
     // set_continuous_acquisition();
     pCam->BeginAcquisition();
@@ -70,6 +66,56 @@ cv::Mat BlackFlyCamera::get_frame(){
     return frame;
 }
 
+void BlackFlyCamera::set_auto_exposure(const Spinnaker::GenICam::gcstring& val){
+    try{
+        // Retrieve enumeration node from nodemap
+        Spinnaker::GenApi::CEnumerationPtr ptrExposureAuto = pCam->GetNodeMap().GetNode("ExposureAuto");
+
+        if (Spinnaker::GenApi::IsReadable(ptrExposureAuto) && Spinnaker::GenApi::IsWritable(ptrExposureAuto))
+        {
+            Spinnaker::GenApi::CEnumEntryPtr ptrExposureAutoVal = ptrExposureAuto->GetEntryByName(val);
+            if (Spinnaker::GenApi::IsReadable(ptrExposureAutoVal))
+            {
+                ptrExposureAuto->SetIntValue(ptrExposureAutoVal->GetValue());
+            }
+            else
+            {
+                std::cout << "Unable to set exposure auto to " << val << "..." << std::endl;
+            }
+
+            // Display auto exposure time setting
+            std::cout << "Auto exposure set to " << ptrExposureAuto->GetCurrentEntry()->GetSymbolic() << std::endl;
+            Spinnaker::GenApi::CFloatPtr ptrExposuretime = pCam->GetNodeMap().GetNode("ExposureTime");
+            auto unit = ptrExposuretime->GetUnit();
+            std::cout << "New exposure time " << ptrExposuretime->GetValue() << " " << unit << std::endl;
+        }
+        else
+        {
+            std::cout << "ExposureAuto not available..." << std::endl;
+        }
 
 
+    }
+    catch (Spinnaker::Exception& e)
+    {
+        std::cout << "Error: " << e.what() << std::endl;
+    }
+}
+
+void BlackFlyCamera::set_exposure_time(float exposure_time){
+    try{
+        set_auto_exposure("Off");
+
+        // Set the exposure time manually; exposure time recorded in microseconds
+        // Retrieve and display exposure time
+        Spinnaker::GenApi::CFloatPtr ptrExposuretime = pCam->GetNodeMap().GetNode("ExposureTime");
+        ptrExposuretime->SetValue(exposure_time);
+        auto unit = ptrExposuretime->GetUnit();
+        std::cout << "New exposure time " << ptrExposuretime->GetValue() << " " << unit << std::endl;
+    }
+    catch (Spinnaker::Exception& e)
+    {
+        std::cout << "Error: " << e.what() << std::endl;
+    }
+}
 }
