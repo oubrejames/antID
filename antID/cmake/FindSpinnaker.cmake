@@ -1,5 +1,4 @@
 # Locate Spinnaker library
-message("SPINNAKER_INCLUDE_DIR: ${SPINNAKER_INCLUDE_DIR}")
 find_path(SPINNAKER_INCLUDE_DIR NAMES Spinnaker.h PATHS /opt/spinnaker/include)
 find_library(SPINNAKER_LIBRARY NAMES Spinnaker PATHS /opt/spinnaker/lib)
 

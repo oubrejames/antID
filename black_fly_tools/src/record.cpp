@@ -8,10 +8,10 @@ int main(){
 
     bfc::BlackFlyCamera camera;
     std::cout << "Camera object created" << std::endl;
-    camera.set_exposure_time(250.0);
+    camera.set_exposure_time(500.0);
     camera.begin_acquisition();
 
-    double fps = 10; //camera.fps; // Frames per second
+    double fps = 20; //camera.fps; // Frames per second
     std::cout << "FPS: " << fps << std::endl;
 
     cv::Mat frame = camera.get_frame();

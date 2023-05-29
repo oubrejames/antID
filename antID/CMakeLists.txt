@@ -3,7 +3,6 @@
 cmake_minimum_required(VERSION 3.22.1)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
-message("CMAKE_INSTALL_PREFIX" ${CMAKE_INSTALL_PREFIX})
 
 # project_name sets the name of the project and causes cmake to
 # find the c and c++ compilers
@@ -21,6 +20,21 @@ add_executable(collect_data src/collect_data.cpp)
 # doxygen_add_docs(doxygen include/ src/ README.md ALL)
 
 find_package(black_fly_tools REQUIRED)
+include_directories(${black_fly_tools_INCLUDE_DIRS})
+
+find_package(Spinnaker REQUIRED)
+include_directories(${Spinnaker_INCLUDE_DIRS})
+
+find_package(turtlelib REQUIRED)
+include_directories(${turtlelib_INCLUDE_DIRS})
+find_package(OpenCV REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS})
+# find_package(conio REQUIRED)
+# include_directories(${conio_INCLUDE_DIRS})
+target_link_libraries(collect_data black_fly_tools::black_fly_tools "${cpp_typesupport_target}")
+############## ###
+# if you really need to just impot all dependencies here and figure out how to do it well later
+############## ###
 
 # target_compile_options(main PUBLIC -Wall -Wextra -Wpedantic)
 
