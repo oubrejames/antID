@@ -6,23 +6,32 @@
 
 int main(){
 
+    // Create a BlackFly camera object
     bfc::BlackFlyCamera camera;
     std::cout << "Camera object created" << std::endl;
+
+    // Set exposure time
     camera.set_exposure_time(500.0);
+
+    // Begin aquiring frames
     camera.begin_acquisition();
 
-    double fps = 20; //camera.fps; // Frames per second
+    // Set frame rate for CV video writer
+    double fps = 20;
     std::cout << "FPS: " << fps << std::endl;
 
+    // Get the first frame to determine the frame size
     cv::Mat frame = camera.get_frame();
-    cv::Size frameSize = frame.size(); //frameSize(2048, 1536); // Set the frame size to your desired dimensions
+    cv::Size frameSize = frame.size();
 
+    // Create a window to display the video
     cv::namedWindow("Video", cv::WINDOW_NORMAL);
     cv::resizeWindow("Video", 800, 600);
+
+    // Create a video writer object
     cv::VideoWriter writer("output_video.avi", cv::VideoWriter::fourcc('M','J','P','G'), fps, frameSize);
 
-    // Open the video file for writing
-    // writer.open(outputFile, fourcc, fps, frameSize);
+    // Check if the video writer was successfully opened
     if (!writer.isOpened())
     {
         // Error handling if the video writer cannot be opened
@@ -30,19 +39,14 @@ int main(){
         return -1;
     }
 
-    bool flag = true;
+    // Loop to display and record frames
+    bool flag = true; // Flag to exit the loop
     while (flag)
     {
-        frame = camera.get_frame();
-        // cap >> frame;
+        frame = camera.get_frame(); // Get a frame from the camera
         cv::imshow("Video", frame); // Display the frame
 
-        // int width = frame.cols;
-        // int height = frame.rows;
-
-        // std::cout << "Frame dimensions: " << width << " x " << height << std::endl;
-
-        writer.write(frame);
+        writer.write(frame);  // Write the frame to the video file
 
         // Exit the loop if the 'Esc' key is pressed
         if (cv::waitKey(1) == 27)

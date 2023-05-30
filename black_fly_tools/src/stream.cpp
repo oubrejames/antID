@@ -6,22 +6,28 @@
 
 int main(){
 
+    // Create a BlackFly camera object
     bfc::BlackFlyCamera camera;
     std::cout << "Camera object created" << std::endl;
+
+    // Set exposure to auto
     camera.set_auto_exposure("Continuous");
+
+    // Begin aquiring frames
     camera.begin_acquisition();
 
+    // Get the first frame to determine the frame size
     cv::Mat frame = camera.get_frame();
     cv::Size frameSize = frame.size(); //frameSize(2048, 1536); // Set the frame size to your desired dimensions
 
+    // Create a window to display the video
     cv::namedWindow("Video", cv::WINDOW_NORMAL);
     cv::resizeWindow("Video", 800, 600);
 
-    bool flag = true;
+    bool flag = true; // Flag to exit the loop
     while (flag)
     {
-        frame = camera.get_frame();
-        // cap >> frame;
+        frame = camera.get_frame(); // Get a frame from the camera
         cv::imshow("Video", frame); // Display the frame
 
         // Exit the loop if the 'Esc' key is pressed

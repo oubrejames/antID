@@ -19,6 +19,8 @@ BlackFlyCamera::BlackFlyCamera(){
 
         // Get camera instance
         pCam = camList.GetByIndex(0);
+
+        // Initialize camera
         pCam->Init();
 
         // Retrieve camera FPS and display
@@ -39,29 +41,41 @@ BlackFlyCamera::BlackFlyCamera(){
 
 // Create a BlackFlyCamera destructor
 BlackFlyCamera::~BlackFlyCamera(){
+    // End acquisition if camera is streaming
     if(pCam->IsStreaming())
         pCam->EndAcquisition();
+
+    // Release image
     // pResultImage->Release();
+
+    // Clear camera list before releasing system
     camList.Clear();
+
+    // Release system instance
     system->ReleaseInstance();
 }
 
 void BlackFlyCamera::begin_acquisition(){
-    // pCam->ExposureTimeSelector();
-    // set_continuous_acquisition();
+    // Begin acquiring images
     pCam->BeginAcquisition();
 }
 
 cv::Mat BlackFlyCamera::get_frame(){
+    // Create image processor instance and set color processing
+    // HQ Linear is noted in documentation to be well balanced for speed and resolution
     Spinnaker::ImageProcessor processor;
     processor.SetColorProcessing(Spinnaker::SPINNAKER_COLOR_PROCESSING_ALGORITHM_HQ_LINEAR);
 
+    // Retrieve next image
     pResultImage = pCam->GetNextImage(1000);
 
+    // Apply image processing
     Spinnaker::ImagePtr color_im = processor.Convert(pResultImage, Spinnaker::PixelFormat_BGR8);
-    // cv::Mat frame = cv::Mat(pResultImage->GetHeight(), pResultImage->GetWidth(), (pResultImage->GetNumChannels() == 3) ? CV_8UC3 : CV_8UC1, pResultImage->GetData(), pResultImage->GetStride());
+
+    // Create OpenCV Mat from image
     cv::Mat frame = cv::Mat(color_im->GetHeight(), color_im->GetWidth(), (color_im->GetNumChannels() == 3) ? CV_8UC3 : CV_8UC1, color_im->GetData(), color_im->GetStride());
 
+    // Release spinnaker image
     pResultImage->Release();
     return frame;
 }
@@ -71,8 +85,10 @@ void BlackFlyCamera::set_auto_exposure(const Spinnaker::GenICam::gcstring& val){
         // Retrieve enumeration node from nodemap
         Spinnaker::GenApi::CEnumerationPtr ptrExposureAuto = pCam->GetNodeMap().GetNode("ExposureAuto");
 
+        // Ensure auto exposure variable can be read and written
         if (Spinnaker::GenApi::IsReadable(ptrExposureAuto) && Spinnaker::GenApi::IsWritable(ptrExposureAuto))
         {
+            // Set exposure auto to value
             Spinnaker::GenApi::CEnumEntryPtr ptrExposureAutoVal = ptrExposureAuto->GetEntryByName(val);
             if (Spinnaker::GenApi::IsReadable(ptrExposureAutoVal))
             {
@@ -104,6 +120,7 @@ void BlackFlyCamera::set_auto_exposure(const Spinnaker::GenICam::gcstring& val){
 
 void BlackFlyCamera::set_exposure_time(float exposure_time){
     try{
+        // Turn off auto exposure
         set_auto_exposure("Off");
 
         // Set the exposure time manually; exposure time recorded in microseconds
