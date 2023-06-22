@@ -18,7 +18,7 @@ to give proper permissions
 ## Installation
 Follow these steps to instaall BlackFly tools on your device:
 1. Clone the repository. `git clone https://github.com/oubrejames/antID.git'
-2. Go into the directory and add a build directory. `cd antID mkdir build`
+2. Go into the directory and add a build directory. `cd black_fly_tools` `mkdir build`
 3. Navigate to the build directory.
 4. Install the package. `sudo make install`
 5. The package can now be found in your `usr/local/` directory.
