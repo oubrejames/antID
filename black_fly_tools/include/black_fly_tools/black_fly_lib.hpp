@@ -32,6 +32,12 @@ class BlackFlyCamera
         /// @brief Pointer to Spinnaker FPS variable.
         Spinnaker::GenApi::CFloatPtr ptrFPS;
 
+        /// @brief Pointer to Spinnaker gain variable.
+        Spinnaker::GenApi::CFloatPtr ptrGain;
+
+        /// @brief Pointer to Spinnaker gamma variable.
+        Spinnaker::GenApi::CFloatPtr ptrGamma;
+
     public:
         BlackFlyCamera();
         ~BlackFlyCamera();
@@ -53,6 +59,14 @@ class BlackFlyCamera
         /// @brief Turn auto exposure on (continuous) or off.
         /// @param val Value of auto exposure (Continuous or off).
         void set_auto_exposure(const Spinnaker::GenICam::gcstring& val);
+
+        /// @brief Manually set camera gain. 
+        /// @param gain Image gain.
+        void set_gain(float gain);
+
+        /// @brief Turn auto gain on (continuous) or off.
+        /// @param val Value of auto gain (Continuous or off).
+        void set_auto_gain(const Spinnaker::GenICam::gcstring& val);
 };
 }
 #endif

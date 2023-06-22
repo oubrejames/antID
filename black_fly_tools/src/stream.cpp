@@ -12,7 +12,10 @@ int main(){
 
     // Set exposure to auto
     camera.set_auto_exposure("Continuous");
+    // camera.set_exposure_time(1000.0);
 
+    // camera.set_auto_gain("Continuous");
+    camera.set_gain(15.0);
     // Begin aquiring frames
     camera.begin_acquisition();
 

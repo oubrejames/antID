@@ -11,13 +11,13 @@ int main(){
     std::cout << "Camera object created" << std::endl;
 
     // Set exposure time
-    camera.set_exposure_time(500.0);
+    camera.set_exposure_time(2000.0);
 
     // Begin aquiring frames
     camera.begin_acquisition();
 
     // Set frame rate for CV video writer
-    double fps = 20;
+    double fps = 30;
     std::cout << "FPS: " << fps << std::endl;
 
     // Get the first frame to determine the frame size
@@ -44,7 +44,11 @@ int main(){
     while (flag)
     {
         frame = camera.get_frame(); // Get a frame from the camera
-        cv::imshow("Video", frame); // Display the frame
+        // double alpha = 3; // Contrast control (1.0-3.0)
+        // double beta = 10; // Brightness control (0-100)
+        // cv::convertScaleAbs(frame, frame, alpha, beta);
+        cv::imshow("Video", frame ); // Display the frame
+        // cv::imshow("Video", frame + cv::Scalar(80, 80, 80)); // Display the frame
 
         writer.write(frame);  // Write the frame to the video file
 

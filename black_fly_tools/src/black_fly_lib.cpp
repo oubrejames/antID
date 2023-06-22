@@ -23,15 +23,21 @@ BlackFlyCamera::BlackFlyCamera(){
         // Initialize camera
         pCam->Init();
 
-        // Retrieve camera FPS and display
-        ptrFPS = pCam->GetNodeMap().GetNode("FrameRate");
-        std::cout << "Camera FPS: " << ptrFPS->GetValue() << std::endl;
-
         // Retrieve and display exposure time
         ptrExposuretime = pCam->GetNodeMap().GetNode("ExposureTime");
         float exposure_time = ptrExposuretime->GetValue();
         auto unit = ptrExposuretime->GetUnit();
         std::cout << "Exposure time " << exposure_time << " " << unit << std::endl;
+
+        // Retrieve and display gain
+        ptrGain = pCam->GetNodeMap().GetNode("Gain");
+        float gain = ptrGain->GetValue();
+        std::cout << "Gain " << gain << std::endl;
+
+        // Retrieve and display gamma
+        ptrGamma = pCam->GetNodeMap().GetNode("Gamma");
+        float gamma = ptrGamma->GetValue();
+        std::cout << "Gamma " << gamma << std::endl;
     }
     catch (Spinnaker::Exception& e)
     {
@@ -135,4 +141,59 @@ void BlackFlyCamera::set_exposure_time(float exposure_time){
         std::cout << "Error: " << e.what() << std::endl;
     }
 }
+
+void BlackFlyCamera::set_auto_gain(const Spinnaker::GenICam::gcstring& val){
+    try{
+        // Retrieve enumeration node from nodemap
+        Spinnaker::GenApi::CEnumerationPtr ptrGain = pCam->GetNodeMap().GetNode("GainAuto");
+
+        // Ensure auto gain variable can be read and written
+        if (Spinnaker::GenApi::IsReadable(ptrGain) && Spinnaker::GenApi::IsWritable(ptrGain))
+        {
+            // Set gain auto to value
+            Spinnaker::GenApi::CEnumEntryPtr ptrGainVal = ptrGain->GetEntryByName(val);
+            if (Spinnaker::GenApi::IsReadable(ptrGainVal))
+            {
+                ptrGain->SetIntValue(ptrGainVal->GetValue());
+            }
+            else
+            {
+                std::cout << "Unable to set gain auto to " << val << "..." << std::endl;
+            }
+
+            // Display auto exposure time setting
+            std::cout << "Auto gain set to " << ptrGain->GetCurrentEntry()->GetSymbolic() << std::endl;
+            Spinnaker::GenApi::CFloatPtr ptrObservedGain = pCam->GetNodeMap().GetNode("Gain");
+            std::cout << "New gain " << ptrObservedGain->GetValue() << std::endl;
+        }
+        else
+        {
+            std::cout << "GainAuto not available..." << std::endl;
+        }
+
+
+    }
+    catch (Spinnaker::Exception& e)
+    {
+        std::cout << "Error: " << e.what() << std::endl;
+    }
+}
+
+void BlackFlyCamera::set_gain(float gain){
+    try{
+        // Turn off auto gain
+        set_auto_gain("Off");
+
+        // Set the gain manually
+        // Retrieve and display gain
+        Spinnaker::GenApi::CFloatPtr ptrGain = pCam->GetNodeMap().GetNode("Gain");
+        ptrGain->SetValue(gain);
+        std::cout << "New gain " << ptrGain->GetValue() << std::endl;
+    }
+    catch (Spinnaker::Exception& e)
+    {
+        std::cout << "Error: " << e.what() << std::endl;
+    }
+}
+
 }
