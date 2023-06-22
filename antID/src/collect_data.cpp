@@ -14,13 +14,20 @@ int main(){
     BlackFlyCamera camera;
 
     // Set exposure time
-    camera.set_exposure_time(5000);
+    camera.set_exposure_time(1500);
+
+    // Enable and set gamma correction
+    camera.enable_gamma(true);
+    camera.set_gamma(0.5);
+
+    // Manually set gain
+    camera.set_gain(20.0);
 
     // Begin capturing images
     camera.begin_acquisition();
 
     // Set frames per second
-    double fps = 20;
+    double fps = 55;
 
     // Get frame size
     cv::Mat frame = camera.get_frame();
@@ -31,7 +38,7 @@ int main(){
     cv::resizeWindow("Live Feed", 800, 600);
 
     // Create video writer object
-    std::string outputFile = "ant_" + std::to_string(curr_id) + ".avi";
+    std::string outputFile = "../../labeled_vids/ant_" + std::to_string(curr_id) + ".avi";
     cv::VideoWriter writer(outputFile, cv::VideoWriter::fourcc('M','J','P','G'), fps, frameSize);
 
     // Check if the video writer is open
@@ -44,6 +51,8 @@ int main(){
 
     bool end_flag = true; // end_flag to end pause_flaging
     bool pause_flag = true; // end_flag to pause pause_flaging
+    std::cout << "Press space to pause" << std::endl;
+
     while (end_flag)
     {
         if (pause_flag){
@@ -55,7 +64,7 @@ int main(){
 
         // Press Space to pause pause_flaging
         if (cv::waitKey(1) == 32){
-            std::cout << "You have paused pause_flaging" << std::endl;
+            std::cout << "You have paused" << std::endl;
             std::cout << "Press:" << std::endl;
             std::cout << "    'q' to quit session" << std::endl;
             std::cout << "    'n' to start new video" << std::endl;
