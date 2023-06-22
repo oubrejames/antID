@@ -62,11 +62,19 @@ class BlackFlyCamera
 
         /// @brief Manually set camera gain. 
         /// @param gain Image gain.
-        void set_gain(float gain);
+        void set_gain(const float gain);
 
         /// @brief Turn auto gain on (continuous) or off.
         /// @param val Value of auto gain (Continuous or off).
         void set_auto_gain(const Spinnaker::GenICam::gcstring& val);
+
+        /// @brief Enable or disable gamma correction.
+        /// @param val Value of gamma correction (True or False).
+        void enable_gamma(const bool& val);
+
+        /// @brief Manually set camera gamma correction.
+        /// @param gamma Gamma correction value.
+        void set_gamma(const float gamma);
 };
 }
 #endif

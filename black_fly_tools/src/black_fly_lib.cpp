@@ -179,7 +179,7 @@ void BlackFlyCamera::set_auto_gain(const Spinnaker::GenICam::gcstring& val){
     }
 }
 
-void BlackFlyCamera::set_gain(float gain){
+void BlackFlyCamera::set_gain(const float gain){
     try{
         // Turn off auto gain
         set_auto_gain("Off");
@@ -189,6 +189,45 @@ void BlackFlyCamera::set_gain(float gain){
         Spinnaker::GenApi::CFloatPtr ptrGain = pCam->GetNodeMap().GetNode("Gain");
         ptrGain->SetValue(gain);
         std::cout << "New gain " << ptrGain->GetValue() << std::endl;
+    }
+    catch (Spinnaker::Exception& e)
+    {
+        std::cout << "Error: " << e.what() << std::endl;
+    }
+}
+
+void BlackFlyCamera::enable_gamma(const bool& val){
+    try{
+        // Retrieve enumeration node from nodemap
+        Spinnaker::GenApi::CBooleanPtr ptrGammaEnable = pCam->GetNodeMap().GetNode("GammaEnable");
+
+        // Ensure gamma enable variable can be read and written
+        if (Spinnaker::GenApi::IsReadable(ptrGammaEnable) && Spinnaker::GenApi::IsWritable(ptrGammaEnable))
+        {
+            // Set gamma enable to value
+            ptrGammaEnable->SetValue(val);
+
+            // Display gamma enable setting
+            std::cout << "Gamma enable set to " << ptrGammaEnable->GetValue() << std::endl;
+        }
+        else
+        {
+            std::cout << "GammaEnable not available..." << std::endl;
+        }
+    }
+    catch (Spinnaker::Exception& e)
+    {
+        std::cout << "Error: " << e.what() << std::endl;
+    }
+}
+
+void BlackFlyCamera::set_gamma(const float gamma){
+    try{
+        // Set the gamma manually
+        // Retrieve and display gamma
+        Spinnaker::GenApi::CFloatPtr ptrGamma = pCam->GetNodeMap().GetNode("Gamma");
+        ptrGamma->SetValue(gamma);
+        std::cout << "New gamma " << ptrGamma->GetValue() << std::endl;
     }
     catch (Spinnaker::Exception& e)
     {
