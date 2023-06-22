@@ -9,6 +9,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 project(antID)
 
 add_executable(collect_data src/collect_data.cpp)
+add_executable(edge_tune examples/edge_feature_tuning.cpp)
+add_executable(video_to_images src/video_to_images.cpp)
 
 
 # enable C++ 17
@@ -18,6 +20,9 @@ add_executable(collect_data src/collect_data.cpp)
 # find_package(Doxygen)
 # set(DOXYGEN_USE_MDFILE_AS_MAINPAGE README.md) # Use the readme in your doxygen docs
 # doxygen_add_docs(doxygen include/ src/ README.md ALL)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GTK REQUIRED gtk+-3.0)
+include_directories(${GTK_INCLUDE_DIRS})
 
 find_package(black_fly_tools REQUIRED)
 include_directories(${black_fly_tools_INCLUDE_DIRS})
@@ -29,6 +34,9 @@ find_package(turtlelib REQUIRED)
 include_directories(${turtlelib_INCLUDE_DIRS})
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
+
 # find_package(conio REQUIRED)
 # include_directories(${conio_INCLUDE_DIRS})
-target_link_libraries(collect_data black_fly_tools::black_fly_tools "${cpp_typesupport_target}")
+target_link_libraries(collect_data ${GTK_LIBRARIES} ${OpenCV_LIBRARIES} ${Spinnaker_LIBRARIES} black_fly_tools::black_fly_tools "${cpp_typesupport_target}")
+target_link_libraries(edge_tune ${GTK_LIBRARIES} ${OpenCV_LIBRARIES} ${Spinnaker_LIBRARIES} black_fly_tools::black_fly_tools "${cpp_typesupport_target}")
+target_link_libraries(video_to_images ${GTK_LIBRARIES} ${OpenCV_LIBRARIES} ${Spinnaker_LIBRARIES} black_fly_tools::black_fly_tools "${cpp_typesupport_target}")
