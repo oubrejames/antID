@@ -69,7 +69,7 @@ int main(){
             std::cout << "    'q' to quit session" << std::endl;
             std::cout << "    'n' to start new video" << std::endl;
             std::cout << "    'c' to continue" << std::endl;
-            std::cout << "Enter now: ";
+            std::cout << "Enter now: "<< " ";
             std::string input;
             std::cin >> input;
 
@@ -88,12 +88,19 @@ int main(){
                 writer.release();
                 writer = cv::VideoWriter(outputFile, cv::VideoWriter::fourcc('M','J','P','G'), fps, frameSize);
                 pause_flag = true;
+                std::cout << "Press space to pause" << std::endl;
+
             }
             else if (input == "c"){
+                std::cout << "Press space to pause" << std::endl;
+
                 continue;
             }
             else{
-                std::cout << "Invalid input" << std::endl;
+                std::cout << "Invalid input, continuing" << std::endl;
+                std::cout << "Press space to pause" << std::endl;
+
+                input = "c";
             }
         }
     }
