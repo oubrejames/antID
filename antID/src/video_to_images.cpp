@@ -3,6 +3,7 @@
 #include <opencv2/video.hpp>
 #include<tuple> 
 #include <iostream>
+#include <algorithm>
 
 cv::Mat apply_mask(cv::Mat frame, cv::Mat mask){
     // Convert mask to 3 channel image
@@ -23,7 +24,7 @@ int main(){
     pBackSub = cv::createBackgroundSubtractorKNN();
 
     // Open video
-    cv::VideoCapture cap("ant_100.avi");
+    cv::VideoCapture cap("../../../test_repo/no_glare_bright_crop.mp4");
 
     // Check if video opened successfully
     if(!cap.isOpened()){
@@ -60,7 +61,7 @@ int main(){
         cv::morphologyEx(fg_mask, fg_mask, cv::MORPH_CLOSE, kernel);
 
         // Apply Canny edge detection to mask
-        cv::Canny(fg_mask, fg_mask, 150, 200);
+        // cv::Canny(fg_mask, fg_mask, 150, 200);
 
         // // Get contours
         // std::vector<std::vector<cv::Point>> contours;
@@ -69,14 +70,22 @@ int main(){
         // Get all pixels in image that are not black
         std::vector<cv::Point> points;
         cv::findNonZero(fg_mask, points);
-
+        
         // Get bounding box around ant and filter if not full ant
         if (points.size() > 0){
             // Get leftmost, rightmost, topmost, and bottommost points of ant
-            auto leftmost_x = points.at(0).x;
-            auto rightmost_x = points.back().x;
-            auto topmost_y = points.at(0).y;
-            auto bottommost_y = points.back().y;
+            // auto leftmost_x = points.at(0).x;
+            auto leftmost_x_point = std::min_element(points.begin(), points.end(), [](cv::Point a, cv::Point b){return a.x < b.x;});
+            auto leftmost_x = leftmost_x_point->x;
+            // auto rightmost_x = points.back().x;
+            auto rightmost_x_point = std::max_element(points.begin(), points.end(), [](cv::Point a, cv::Point b){return a.x < b.x;});
+            auto rightmost_x = rightmost_x_point->x;
+            // auto topmost_y = points.at(0).y;
+            auto topmost_y_point = std::min_element(points.begin(), points.end(), [](cv::Point a, cv::Point b){return a.y < b.y;});
+            auto topmost_y = topmost_y_point->y;
+            // auto bottommost_y = points.back().y;
+            auto bottommost_y_point = std::max_element(points.begin(), points.end(), [](cv::Point a, cv::Point b){return a.y < b.y;});
+            auto bottommost_y = bottommost_y_point->y;
 
             // Get area of bounding box
             auto bounding_box_area =  (rightmost_x - leftmost_x) * (bottommost_y - topmost_y);
@@ -85,17 +94,30 @@ int main(){
             auto image_area = fg_mask.rows * fg_mask.cols;
 
             // Get percent of bounding box area to image area
-            auto percent_area = bounding_box_area / image_area;
+            auto percent_area = static_cast<float>(bounding_box_area) / static_cast<float>(image_area);
 
+            std::cout << "bounding_box_area: " << bounding_box_area << std::endl;
+            std::cout << "percent area: " << percent_area << std::endl;
             // Filter if bounding box area is less than 22.35%  and greater than 70% of image area
-            if (percent_area < 0.2235 || percent_area > 0.7){
+            if (percent_area > 0.2235 && percent_area < 0.7){
                 // Draw bounding box around ant
-                cv::rectangle(frame, cv::Point(leftmost_x, topmost_y), cv::Point(rightmost_x, bottommost_y), cv::Scalar(0, 255, 0), 2);
+                cv::rectangle(frame, cv::Point(leftmost_x, topmost_y), cv::Point(rightmost_x, bottommost_y), cv::Scalar(0, 255, 0), 5);
             }
         }
 
 
         cv::Mat masked_image = apply_mask(frame, fg_mask);
+
+        // Create and resize windows
+        cv::namedWindow("Mask", cv::WINDOW_NORMAL);
+        cv::resizeWindow("Mask", 800, 600);
+
+        // Display frame
+        cv::imshow("Mask", fg_mask);
+
+        // Create and resize windows
+        cv::namedWindow("Frame", cv::WINDOW_NORMAL);
+        cv::resizeWindow("Frame", 800, 600);
 
         // Display frame
         cv::imshow("Frame", frame);
