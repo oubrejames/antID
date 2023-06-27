@@ -82,7 +82,7 @@ int main(){
 
                 // Increment ant ID number and update output file name
                 curr_id++;
-                outputFile = "ant_" + std::to_string(curr_id) + ".avi";
+                outputFile = "../../labeled_vids/ant_" + std::to_string(curr_id) + ".avi";
 
                 // Release current video writer and create new one
                 writer.release();
