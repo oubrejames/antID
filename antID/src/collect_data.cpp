@@ -1,6 +1,7 @@
 #include <iostream>
 #include <black_fly_tools/black_fly_lib.hpp>
 #include "turtlelib/rigid2d.hpp"
+#include <filesystem>
 
 using namespace bfc;
 
@@ -39,6 +40,15 @@ int main(){
 
     // Create video writer object
     std::string outputFile = "../../labeled_vids/ant_" + std::to_string(curr_id) + ".avi";
+
+    // Check if output file already exists
+    while (std::filesystem::exists(outputFile)){
+        // Increment ant ID number and update output file name
+        curr_id++;
+        outputFile = "../../labeled_vids/ant_" + std::to_string(curr_id) + ".avi";
+        std::cout << "Video file already exists. Changing name to ant_" << curr_id << std::endl;
+    }
+
     cv::VideoWriter writer(outputFile, cv::VideoWriter::fourcc('M','J','P','G'), fps, frameSize);
 
     // Check if the video writer is open
@@ -89,7 +99,6 @@ int main(){
                 writer = cv::VideoWriter(outputFile, cv::VideoWriter::fourcc('M','J','P','G'), fps, frameSize);
                 pause_flag = true;
                 std::cout << "Press space to pause" << std::endl;
-
             }
             else if (input == "c"){
                 std::cout << "Press space to pause" << std::endl;
