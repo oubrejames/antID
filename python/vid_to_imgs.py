@@ -15,6 +15,9 @@ def get_head_box(im):
     # detections = model.predict(im, confidence=60, overlap=30).json()
     detections_raw = model(im, conf=0.8)
     detections = detections_raw[0] # Only expecting max 1 detection per image
+    for ele in detections_raw:
+        print(type(ele))
+    print("---------------------:)")
     if detections.size()[0] > 0:
         detection = detections[0]
         bbox = detection.boxes
