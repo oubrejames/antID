@@ -15,8 +15,8 @@ def get_head_box(im):
     # detections = model.predict(im, confidence=60, overlap=30).json()
     detections = model(im, conf=0.8)
     print("detections: ", detections)
-    if detections['predictions']:
-        detection = detections['predictions'][0]
+    if detections:
+        detection = detections[0]
 
         x1 = int(detection['x']) - int(detection['width'] / 2)
         x2 = int(detection['x']) + int(detection['width'] / 2)
