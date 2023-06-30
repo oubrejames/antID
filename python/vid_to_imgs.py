@@ -2,11 +2,14 @@ import cv2
 import numpy as np
 from roboflow import Roboflow
 import os
+from ultralytics import YOLO
 
 # Import YOLO model from Roboflow to detect ant heads
-rf = Roboflow(api_key="WZMvKYOhn8xpuDVHz6JX")
-project = rf.workspace("antid").project("ant-face-detect")
-model = project.version(1).model
+# rf = Roboflow(api_key="WZMvKYOhn8xpuDVHz6JX")
+# project = rf.workspace("antid").project("ant-face-detect")
+# model = project.version(1).model
+
+model= YOLO("YOLO_V8/runs/detect/yolov8s_v8_25e5/weights/best.pt")
 
 def get_head_box(im):
     detections = model.predict(im, confidence=60, overlap=30).json()
