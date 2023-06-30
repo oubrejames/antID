@@ -14,7 +14,7 @@ model= YOLO("YOLO_V8/runs/detect/yolov8s_v8_25e5/weights/best.pt")
 def get_head_box(im):
     # detections = model.predict(im, confidence=60, overlap=30).json()
     detections = model(im, conf=0.8)
-
+    print("Detection type: ", type(detections))
     if detections.size()[0] > 0:
         detection = detections[0]
         bbox = detection.boxes
