@@ -3,7 +3,6 @@ import numpy as np
 from roboflow import Roboflow
 import os
 from ultralytics import YOLO
-from UMatFileVideoStream import UMatFileVideoStream
 
 
 model= YOLO("YOLO_V8/runs/detect/yolov8s_v8_25e5/weights/best.pt")
@@ -29,7 +28,7 @@ def get_head_box(im):
 def main():
     # Initialize counter for image names
     img_cnt = 0
-
+    
     # Loop through all videos in labeled_videos
     videos_directory = "../labeled_vids"
     print("Processing videos in " + videos_directory)
@@ -37,15 +36,11 @@ def main():
         path_to_video = os.path.join(videos_directory, ant_video)
 
         # Open video with OpenCV
-        # cap= cv2.VideoCapture(path_to_video)
-
-        video = UMatFileVideoStream(path_to_video).start()
+        cap= cv2.VideoCapture(path_to_video)
 
         # Loop through all frames in video
         while(1):
-            # ret, frame = cap.read()
-            frame_umat = video.read()
-            frame = frame_umat.get() # Get as numpy array
+            ret, frame = cap.read()
             if frame is None:
                 break
             
