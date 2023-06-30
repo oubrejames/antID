@@ -17,7 +17,7 @@ def get_head_box(im):
     bboxes = detections[0].boxes.numpy()
     print('bbox: ', bboxes)
     print("bbox type: ", type(bboxes))
-    print('As np', bboxes.xyxy.)
+    print('As np', bboxes.xyxy)
     print("bbox shape: ", bboxes.size())
     if detections.size()[0] > 0:
         detection = detections[0]
