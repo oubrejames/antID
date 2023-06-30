@@ -20,6 +20,7 @@ def get_head_box(im):
     if num_detections > 0:
         detection = detections[0]
         bbox = detection.boxes
+        print('bbox.xyxy', bbox.xyxy)
         x1 = bbox.xyxy[0] #int(detection['x']) - int(detection['width'] / 2)
         x2 = bbox.xyxy[2] #int(detection['x']) + int(detection['width'] / 2)
         y1 = bbox.xyxy[1] #int(detection['y']) - int(detection['height'] / 2)
