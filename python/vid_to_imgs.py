@@ -43,7 +43,7 @@ def main():
         # cap= cv2.VideoCapture(path_to_video)
 
         command = ['ffmpeg',
-                    '-i', input_file,
+                    '-i', path_to_video,
                     '-pix_fmt', 'bgr24',
                     '-codec', 'rawvideo',
                     '-an',
