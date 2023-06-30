@@ -40,7 +40,7 @@ def main():
 
         # Create path to save images
         ant_id = path_to_video.split("/")[-1].split(".")[0]
-        path_to_imgs = "../labeled_imgs/" + ant_id
+        path_to_imgs = "../labeled_images/" + ant_id
         os.mkdir(path_to_imgs)
 
         # Loop through all frames in video
