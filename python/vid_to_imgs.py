@@ -44,7 +44,8 @@ def main():
         # Loop through all frames in video
         while(1):
             # ret, frame = cap.read()
-            frame = video.read()
+            frame_umat = video.read()
+            frame = frame_umat.get() # Get as numpy array
             if frame is None:
                 break
             
