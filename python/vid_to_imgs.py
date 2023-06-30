@@ -3,11 +3,8 @@ import numpy as np
 from roboflow import Roboflow
 import os
 from ultralytics import YOLO
-import subprocess as sp
-# Import YOLO model from Roboflow to detect ant heads
-# rf = Roboflow(api_key="WZMvKYOhn8xpuDVHz6JX")
-# project = rf.workspace("antid").project("ant-face-detect")
-# model = project.version(1).model
+from UMatFileVideoStream import UMatFileVideoStream
+
 
 model= YOLO("YOLO_V8/runs/detect/yolov8s_v8_25e5/weights/best.pt")
 
@@ -32,7 +29,7 @@ def get_head_box(im):
 def main():
     # Initialize counter for image names
     img_cnt = 0
-    
+
     # Loop through all videos in labeled_videos
     videos_directory = "../labeled_vids"
     print("Processing videos in " + videos_directory)
@@ -42,22 +39,12 @@ def main():
         # Open video with OpenCV
         # cap= cv2.VideoCapture(path_to_video)
 
-        command = ['ffmpeg',
-                    '-i', path_to_video,
-                    '-pix_fmt', 'bgr24',
-                    '-codec', 'rawvideo',
-                    '-an',
-                    '-sn',
-                    '-f', 'image2pipe', '-'] 
-
-        pipe = sp.Popen(command, stdout = sp.PIPE, bufsize=64000000)
+        video = UMatFileVideoStream(files[0], selectionRate).start()
 
         # Loop through all frames in video
         while(1):
             # ret, frame = cap.read()
-            frame =  pipe.stdout.read(height*width*3)
-            frame =  np.frombuffer(frame, dtype='uint8')        # convert read bytes to np
-
+            frame = video.read()
             if frame is None:
                 break
             
