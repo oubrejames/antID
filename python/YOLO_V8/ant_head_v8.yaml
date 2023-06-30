@@ -1,0 +1,7 @@
+path: ant-face-detect.v1-ant_head_v1.yolov8/
+train: 'train/images'
+val: 'valid/images'
+ 
+# class names
+names: 
+  0: 'ant-face'
