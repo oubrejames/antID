@@ -1,4 +1,14 @@
-from ultralytics import YOLO
 
-!nvidia-smi
-!yolo task=detect mode=train model=yolov8s.pt data={dataset.location}/ant_head_v8.yaml epochs=25 imgsz=800 plots=True
+from ultralytics import YOLO
+ 
+# Load the model.
+model = YOLO('yolov8s.pt')
+ 
+# Training.
+results = model.train(
+   data='ant_head_v8.yaml',
+   imgsz=800,
+   epochs=25,
+   batch=8,
+   name='yolov8s_v8_25e'
+)
