@@ -20,12 +20,10 @@ def get_head_box(im):
     if num_detections > 0:
         detection = detections[0]
         bbox = detection.boxes
-        print('bbox.xyxy', bbox.xyxy)
         x1 = bbox.xyxy[0][0] #int(detection['x']) - int(detection['width'] / 2)
         x2 = bbox.xyxy[0][2] #int(detection['x']) + int(detection['width'] / 2)
         y1 = bbox.xyxy[0][1] #int(detection['y']) - int(detection['height'] / 2)
         y2 = bbox.xyxy[0][3] #int(detection['y']) + int(detection['height'] / 2)
-        print("Bounding box: " + str(x1) + ", " + str(y1) + ", " + str(x2) + ", " + str(y2))
         box = [[x1, y1], [x2, y2]]
         return box
     else:
@@ -57,7 +55,7 @@ def main():
                 continue
 
             # Crop image to head
-            head_crop_img = frame[y1:y2, x1:x2]
+            head_crop_img = frame[head_box[0][1]:head_box[1][1], head_box[0][0]:head_box[1][0]]
 
             # Get ant label
             ant_id = path_to_video.split("/")[-1].split(".")[0]
