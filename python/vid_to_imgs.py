@@ -42,13 +42,13 @@ def main():
         # Open video with OpenCV
         # cap= cv2.VideoCapture(path_to_video)
 
-    command = ['ffmpeg',
-                '-i', input_file,
-                '-pix_fmt', 'bgr24',
-                '-codec', 'rawvideo',
-                '-an',
-                '-sn',
-                '-f', 'image2pipe', '-'] 
+        command = ['ffmpeg',
+                    '-i', input_file,
+                    '-pix_fmt', 'bgr24',
+                    '-codec', 'rawvideo',
+                    '-an',
+                    '-sn',
+                    '-f', 'image2pipe', '-'] 
 
         pipe = sp.Popen(command, stdout = sp.PIPE, bufsize=64000000)
 
