@@ -4,3 +4,5 @@ SpinnakerVideoCapture
 .gitignore
 .vscode
 videos
+labeled_images/
+labeled_vids/
