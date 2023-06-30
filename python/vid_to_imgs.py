@@ -16,6 +16,7 @@ def get_head_box(im):
     detections_raw = model(im, conf=0.8)
     detections = detections_raw[0] # Only expecting max 1 detection per image
     for ele in detections_raw:
+        print('NEW')
         print(type(ele))
     print("---------------------:)")
     if detections.size()[0] > 0:
