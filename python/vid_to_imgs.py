@@ -12,8 +12,9 @@ from ultralytics import YOLO
 model= YOLO("YOLO_V8/runs/detect/yolov8s_v8_25e5/weights/best.pt")
 
 def get_head_box(im):
-    detections = model.predict(im, confidence=60, overlap=30).json()
-
+    # detections = model.predict(im, confidence=60, overlap=30).json()
+    detections = model(im, conf=0.8)
+    print("detections: ", detections)
     if detections['predictions']:
         detection = detections['predictions'][0]
 
