@@ -3,7 +3,7 @@ import numpy as np
 from roboflow import Roboflow
 import os
 from ultralytics import YOLO
-
+import subprocess as sp
 # Import YOLO model from Roboflow to detect ant heads
 # rf = Roboflow(api_key="WZMvKYOhn8xpuDVHz6JX")
 # project = rf.workspace("antid").project("ant-face-detect")
@@ -40,11 +40,24 @@ def main():
         path_to_video = os.path.join(videos_directory, ant_video)
 
         # Open video with OpenCV
-        cap= cv2.VideoCapture(path_to_video)
+        # cap= cv2.VideoCapture(path_to_video)
+
+        command = [ffmpeg,
+                '-i', input_file,
+                    '-r', fps,                  # FPS
+                    '-pix_fmt', 'bgr24',        # opencv requires bgr24 pixel format.
+                    '-vcodec', 'mp4',
+                    '-an','-sn',                # disable audio processing
+                    '-f', 'image2pipe', '-']    
+
+        pipe = sp.Popen(command, stdout = sp.PIPE, bufsize=64000000)
 
         # Loop through all frames in video
         while(1):
-            ret, frame = cap.read()
+            # ret, frame = cap.read()
+            frame =  pipe.stdout.read(height*width*3)
+            frame =  np.frombuffer(frame, dtype='uint8')        # convert read bytes to np
+
             if frame is None:
                 break
             
