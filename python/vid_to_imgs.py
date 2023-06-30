@@ -55,7 +55,11 @@ def main():
                 continue
 
             # Crop image to head
-            head_crop_img = frame[head_box[0][1]:head_box[1][1], head_box[0][0]:head_box[1][0]]
+            y1 = int(head_box[0][1])
+            y2 = int(head_box[1][1])
+            x1 = int(head_box[0][0])
+            x2 = int(head_box[1][0])
+            head_crop_img = frame[y1:y2,x1:x2]
 
             # Get ant label
             ant_id = path_to_video.split("/")[-1].split(".")[0]
