@@ -38,6 +38,11 @@ def main():
         # Open video with OpenCV
         cap= cv2.VideoCapture(path_to_video)
 
+        # Create path to save images
+        ant_id = path_to_video.split("/")[-1].split(".")[0]
+        path_to_imgs = "../labeled_imgs/" + ant_id
+        os.mkdir(path_to_imgs)
+
         # Loop through all frames in video
         while(1):
             ret, frame = cap.read()
@@ -58,8 +63,7 @@ def main():
             head_crop_img = frame[y1:y2,x1:x2]
 
             # Get ant label
-            ant_id = path_to_video.split("/")[-1].split(".")[0]
-            path_to_label = "../labeled_imgs/" + ant_id + "/im" + str(img_cnt) + ".jpg"
+            path_to_label = path_to_imgs + "/im" + str(img_cnt) + ".jpg"
 
             # Save cropped image to labeled_images
             cv2.imwrite(path_to_label ,head_crop_img)
