@@ -21,10 +21,10 @@ def get_head_box(im):
         detection = detections[0]
         bbox = detection.boxes
         print('bbox.xyxy', bbox.xyxy)
-        x1 = bbox.xyxy[0] #int(detection['x']) - int(detection['width'] / 2)
-        x2 = bbox.xyxy[2] #int(detection['x']) + int(detection['width'] / 2)
-        y1 = bbox.xyxy[1] #int(detection['y']) - int(detection['height'] / 2)
-        y2 = bbox.xyxy[3] #int(detection['y']) + int(detection['height'] / 2)
+        x1 = bbox.xyxy[0][0] #int(detection['x']) - int(detection['width'] / 2)
+        x2 = bbox.xyxy[0][2] #int(detection['x']) + int(detection['width'] / 2)
+        y1 = bbox.xyxy[0][1] #int(detection['y']) - int(detection['height'] / 2)
+        y2 = bbox.xyxy[0][3] #int(detection['y']) + int(detection['height'] / 2)
         print("Bounding box: " + str(x1) + ", " + str(y1) + ", " + str(x2) + ", " + str(y2))
         box = [[x1, y1], [x2, y2]]
         return box
