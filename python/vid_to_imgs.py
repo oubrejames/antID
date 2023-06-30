@@ -15,6 +15,8 @@ def get_head_box(im):
     # detections = model.predict(im, confidence=60, overlap=30).json()
     detections = model(im, conf=0.8)
     bboxes = detections[0].boxes
+    print('bbox: ', bboxes)
+    print("bbox type: ", type(bboxes))
     print("bbox shape: ", bboxes.shape())
     if detections.size()[0] > 0:
         detection = detections[0]
