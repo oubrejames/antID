@@ -6,7 +6,7 @@ model = YOLO('yolov8s.pt')
  
 # Training.
 results = model.train(
-   data='ant-face-detect.v1-ant_head_v1.yolov8/data.yaml',
+   data='ant_head_v8.yaml',
    imgsz=800,
    epochs=25,
    batch=8,

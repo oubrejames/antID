@@ -1,4 +1,4 @@
-path: ant-face-detect.v1-ant_head_v1.yolov8/
+path: ant_face_dataset_v8
 train: 'train/images'
 val: 'valid/images'
  
