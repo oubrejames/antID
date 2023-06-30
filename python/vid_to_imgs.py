@@ -3,23 +3,12 @@ import numpy as np
 from roboflow import Roboflow
 import os
 
-# Opens the Video file
-cap= cv2.VideoCapture('labeled_vids/ant_0.avi')
-i=0
-while(cap.isOpened()):
-    ret, frame = cap.read()
-    if ret == False:
-        break
-    cv2.imwrite('labeled_imgs/ant_0/im'+str(i)+'.jpg',frame)
-    i+=1
- 
-cap.release()
-cv2.destroyAllWindows()
-
-########
+# Import YOLO model from Roboflow to detect ant heads
+rf = Roboflow(api_key="WZMvKYOhn8xpuDVHz6JX")
+project = rf.workspace("antid").project("ant-face-detect")
+model = project.version(1).model
 
 def get_head_box(im):
-    im = cv2.imread("/home/oubre/ants/antid_ws/labeled_images/ant_5/ant_53_im_190.jpg")
     detections = model.predict(im, confidence=60, overlap=30).json()
 
     if detections['predictions']:
@@ -35,16 +24,12 @@ def get_head_box(im):
         return None
 
 def main():
-    # Import YOLO model from Roboflow to detect ant heads
-    rf = Roboflow(api_key="WZMvKYOhn8xpuDVHz6JX")
-    project = rf.workspace("antid").project("ant-face-detect")
-    model = project.version(1).model
-    
     # Initialize counter for image names
     img_cnt = 0
     
     # Loop through all videos in labeled_videos
     videos_directory = "../labeled_vids"
+    print("Processing videos in " + videos_directory)
     for ant_video in os.listdir(videos_directory):
         path_to_video = os.path.join(videos_directory, ant_video)
 
@@ -78,3 +63,6 @@ def main():
         print("Finished processing video: " + ant_video)
         print("Saved " + str(img_cnt) + " images to labeled_images/" + ant_id)
         print("------------------------------------------------------------\n")
+
+if __name__ == "__main__":
+    main()
