@@ -39,7 +39,7 @@ def main():
         # Open video with OpenCV
         # cap= cv2.VideoCapture(path_to_video)
 
-        video = UMatFileVideoStream(files[0], selectionRate).start()
+        video = UMatFileVideoStream(path_to_video).start()
 
         # Loop through all frames in video
         while(1):
