@@ -26,7 +26,10 @@ import shutil
 # Loop through all folders in labeled_images (each folder contains images of one ant)
 path_to_labeled_images = "../labeled_images"
 path_to_dataset = "../ant_faces_dataset"
-# os.mkdir(os.path.join(path_to_dataset, "faces"))
+try:
+    os.mkdir(os.path.join(path_to_dataset, "faces"))
+except:
+    pass
 
 # Add headers to CSV
 head = ["id", "img_file_name"]
@@ -53,8 +56,11 @@ for ant_dir in os.listdir(path_to_labeled_images):
         row = [ant_id, new_img]
 
         # Rename image and move to new folder
-        # os.rename(img_path, new_img_path)
-        shutil.copy(img_path, new_img_path)
+        try:
+            os.rename(img_path, new_img_path)
+        except:
+            pass
+        # shutil.copy(img_path, new_img_path)
 
         # Save row to csv file
         with open(os.path.join(path_to_dataset, "faces","labels.csv"), "a") as f:
