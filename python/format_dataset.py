@@ -21,10 +21,20 @@
 # Imports
 import os
 import csv
+import shutil
 
 # Loop through all folders in labeled_images (each folder contains images of one ant)
 path_to_labeled_images = "../../tmp_data"
 path_to_dataset = "../ant_faces_dataset"
+# os.mkdir(os.path.join(path_to_dataset, "faces"))
+
+# Add headers to CSV
+head = ["id", "img_file_name"]
+
+# Save header to csv file
+with open(os.path.join(path_to_dataset, "faces","labels.csv"), "a") as f:
+    writer = csv.writer(f)
+    writer.writerow(head)
 
 for ant_dir in os.listdir(path_to_labeled_images):
     # Create path to ant folder
@@ -38,14 +48,21 @@ for ant_dir in os.listdir(path_to_labeled_images):
         # Create path to new image
         new_img = ant_dir + "_" + img.split(".")[0] + ".jpg"
         new_img_path = os.path.join(path_to_dataset, "faces", new_img)
-        
+        ant_id = ant_dir.split("_")[0]
         # Create row for csv file
-        row = [ant_dir, new_img]
+        row = [ant_id, new_img]
 
         # Rename image and move to new folder
-        os.rename(img_path, new_img_path)
+        # os.rename(img_path, new_img_path)
+        shutil.copy(img_path, new_img_path)
 
         # Save row to csv file
-        with open(os.path.join(path_to_dataset, "labels.csv"), "a") as f:
+        with open(os.path.join(path_to_dataset, "faces","labels.csv"), "a") as f:
             writer = csv.writer(f)
             writer.writerow(row)
+
+# Create a zip of the dataset
+path_to_dataset = "../ant_faces_dataset"
+
+shutil.make_archive("ant_face_dataset_zip", 'zip', path_to_dataset)
+
