@@ -58,7 +58,7 @@ for ant_dir in os.listdir(path_to_labeled_images):
         # Create path to new image
         new_img = ant_dir + "_" + img.split(".")[0] + ".jpg"
         new_img_path = os.path.join(path_to_dataset, "faces", new_img)
-        ant_id = ant_dir.split("_")[0]
+        ant_id = ant_dir.split("_")[-1]
         # Create row for csv file
         row = [ant_id, new_img]
 
