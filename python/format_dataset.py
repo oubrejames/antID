@@ -24,7 +24,7 @@ import csv
 import shutil
 
 # Loop through all folders in labeled_images (each folder contains images of one ant)
-path_to_labeled_images = "../../tmp_data"
+path_to_labeled_images = "../labeled_images"
 path_to_dataset = "../ant_faces_dataset"
 # os.mkdir(os.path.join(path_to_dataset, "faces"))
 
