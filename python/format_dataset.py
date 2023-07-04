@@ -63,11 +63,11 @@ for ant_dir in os.listdir(path_to_labeled_images):
         row = [ant_id, new_img]
 
         # Rename image and move to new folder
-        try:
-            os.rename(img_path, new_img_path)
-        except:
-            pass
-        # shutil.copy(img_path, new_img_path)
+        # try:
+        #     # os.rename(img_path, new_img_path)
+        # except:
+        #     pass
+        shutil.copy(img_path, new_img_path)
 
         # Save row to csv file
         with open(os.path.join(path_to_dataset, "faces","labels.csv"), "a") as f:
