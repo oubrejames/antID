@@ -25,6 +25,8 @@ import shutil
 
 # Loop through all folders in labeled_images (each folder contains images of one ant)
 path_to_labeled_images = "../labeled_images"
+# path_to_labeled_images = "../../tmp_data" # for debugging local to laptop
+
 path_to_dataset = "../ant_faces_dataset"
 
 try:
@@ -49,7 +51,7 @@ with open(os.path.join(path_to_dataset, "faces","labels.csv"), "a") as f:
 for ant_dir in os.listdir(path_to_labeled_images):
     # Create path to ant folder
     ant_dir_path = os.path.join(path_to_labeled_images, ant_dir)
-
+    print("Loop through folder: {}".format(ant_dir_path))
     # Loop through all images in each folder
     for img in os.listdir(ant_dir_path):
         # Create path to image
