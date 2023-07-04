@@ -48,7 +48,7 @@ class AntFaceDataset(Dataset):
                                 self.ant_face_df.iloc[idx, 1])
         image = io.imread(img_name)
         id = self.ant_face_df.iloc[idx, 0]
-        id = id[-1] # Get the last character of the id (the number)
+        id = id.split("_")[0] # Get the last character of the id (the number) 
         sample = {'id':id, 'image': image}
 
         return sample
