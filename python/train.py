@@ -64,8 +64,8 @@ def train_one_epoch(model, data_loader, optimizer, criterion):
         running_loss += loss.item() * inputs.size(0)
         running_corrects += torch.sum(preds == labels.data)
 
-    epoch_loss = running_loss / dataset_sizes[phase]
-    epoch_acc = running_corrects.double() / dataset_sizes[phase]
+    epoch_loss = running_loss / dataset_sizes['train']
+    epoch_acc = running_corrects.double() / dataset_sizes['train']
 
     return model, epoch_loss, epoch_acc
 
@@ -93,10 +93,8 @@ def validate_one_epoch(model, data_loader):
         running_loss += loss.item() * inputs.size(0)
         running_corrects += torch.sum(preds == labels.data)
 
-    epoch_loss = running_loss / dataset_sizes[phase]
-    epoch_acc = running_corrects.double() / dataset_sizes[phase]
-
-    print(f'{phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}')
+    epoch_loss = running_loss / dataset_sizes['val']
+    epoch_acc = running_corrects.double() / dataset_sizes['val']
 
     # deep copy the model
     if epoch_acc > best_acc:
