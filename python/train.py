@@ -140,7 +140,7 @@ class ConvNeuralNet(nn.Module):
         
         ## Py img search
         # initialize first set of CONV => RELU => POOL layers
-        self.conv1 = nn.Conv2d(in_channels=numChannels, out_channels=20,
+        self.conv1 = nn.Conv2d(in_channels=3, out_channels=20,
             kernel_size=(5, 5))
         self.relu1 = nn.ReLU()
         self.maxpool1 = nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
@@ -153,7 +153,7 @@ class ConvNeuralNet(nn.Module):
         self.fc1 = nn.Linear(in_features=800, out_features=500)
         self.relu3 = nn.ReLU()
         # initialize our softmax classifier
-        self.fc2 = nn.Linear(in_features=500, out_features=classes)
+        self.fc2 = nn.Linear(in_features=500, out_features=num_classes)
         self.logSoftmax = nn.LogSoftmax(dim=1)
 
     # # Progresses data across layers
