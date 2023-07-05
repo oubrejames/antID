@@ -92,7 +92,7 @@ class ToTensor(object):
     """Convert ndarrays in sample to Tensors."""
 
     def __call__(self, sample):
-        image, id = sample['image'], sample['landmarks']
+        image, id = sample['image'], sample['id']
 
         # swap color axis because
         # numpy image: H x W x C
@@ -198,7 +198,7 @@ total_step = len(train_loader)
 # Training loop
 for epoch in range(num_epochs):
 	#Load in the data in batches using the train_loader object
-    for i, (images, labels) in enumerate(train_loader):  
+    for i, (images, labels) in enumerate(train_loader):
         # Move tensors to the configured device
         images = images.to(device)
         labels = labels.to(device)
