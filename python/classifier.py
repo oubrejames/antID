@@ -161,19 +161,16 @@ train_dataset, test_dataset, val_dataset = torch.utils.data.random_split(face_da
 train_loader = DataLoader(train_dataset, 
                           batch_size=batch_size,
                           shuffle=True,
-                          train=True,
                           num_workers=0)
 
 test_loader = DataLoader(test_dataset, 
                           batch_size=batch_size,
                           shuffle=True,
-                          train=False,
                           num_workers=0)
 
 val_loader = DataLoader(val_dataset, 
                           batch_size=batch_size,
                           shuffle=True,
-                          train=False,
                           num_workers=0)
 
 
