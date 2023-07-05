@@ -141,7 +141,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
 class CNN(nn.Module):
 	#  Determine what layers and their order in CNN object 
     def __init__(self, num_classes):
-        super(ConvNeuralNet, self).__init__()
+        super(CNN, self).__init__()
         self.conv_layer1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3)
         self.conv_layer2 = nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3)
         self.max_pool1 = nn.MaxPool2d(kernel_size = 2, stride = 2)
