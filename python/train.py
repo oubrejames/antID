@@ -122,16 +122,15 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=50):
             print('Training Loss: {:.4f} Acc: {:.4f}'.format(train_loss, train_acc))
             print('Validation Loss: {:.4f} Acc: {:.4f}'.format(val_loss, val_acc))
 
-            if early_stopper.early_stop(val_loss):
-                print("Stopping early. Validation loss did not improve for {} epochs.", early_stopper.patience)
-                break
-
                 # deep copy the model
             if val_acc > best_acc:
                 best_acc = val_acc
                 torch.save(model.state_dict(), best_model_params_path)
 
-            
+            if early_stopper.early_stop(val_loss):
+                print("Stopping early. Validation loss did not improve for {d} epochs.".format(early_stopper.patience))
+                break
+
         time_elapsed = time.time() - since
         print(f'Training complete in {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s')
         print(f'Best val Acc: {best_acc:4f}')
@@ -229,7 +228,7 @@ optimizer_ft = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
 
 model_ft = train_model(model, criterion, optimizer_ft, exp_lr_scheduler,
-                       num_epochs=25)
+                       num_epochs=50)
 
 
 
