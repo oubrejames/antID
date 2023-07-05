@@ -152,6 +152,7 @@ class ConvNeuralNet(nn.Module):
         return out
 
 model = ConvNeuralNet(len(class_names))
+model = model.to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer_ft = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
