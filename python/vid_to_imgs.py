@@ -35,13 +35,21 @@ def main():
     for ant_video in os.listdir(videos_directory):
         path_to_video = os.path.join(videos_directory, ant_video)
 
-        # Open video with OpenCV
-        cap= cv2.VideoCapture(path_to_video)
-
         # Create path to save images
         ant_id = path_to_video.split("/")[-1].split(".")[0]
         path_to_imgs = "../labeled_images/" + ant_id
+
+        # Check if directory already exists
+        if os.path.exists(path_to_imgs):
+            print("Images for " + ant_id + " already exist. Skipping...")
+            continue
+        
         os.mkdir(path_to_imgs)
+
+
+
+        # Open video with OpenCV
+        cap= cv2.VideoCapture(path_to_video)
 
         # Loop through all frames in video
         while(1):
