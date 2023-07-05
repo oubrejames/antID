@@ -108,7 +108,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=50):
 
         torch.save(model.state_dict(), best_model_params_path)
         best_acc = 0.0
-        early_stopper = EarlyStopper(patience=3, min_delta=0.01)
+        early_stopper = EarlyStopper(patience=3, min_delta=0.001)
         for epoch in range(num_epochs):
             print(f'Epoch {epoch}/{num_epochs - 1}')
             print('-' * 10)
