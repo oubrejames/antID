@@ -96,11 +96,6 @@ def validate_one_epoch(model, data_loader, optimizer):
     epoch_loss = running_loss / dataset_sizes['val']
     epoch_acc = running_corrects.double() / dataset_sizes['val']
 
-    # deep copy the model
-    if epoch_acc > best_acc:
-        best_acc = epoch_acc
-        torch.save(model.state_dict(), best_model_params_path)
-
     return epoch_loss, epoch_acc
 
 
@@ -127,6 +122,12 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
             print('Training Loss: {:.4f} Acc: {:.4f}'.format(train_loss, train_acc))
             print('Validation Loss: {:.4f} Acc: {:.4f}'.format(val_loss, val_acc))
 
+                # deep copy the model
+            if val_acc > best_acc:
+                best_acc = val_acc
+                torch.save(model.state_dict(), best_model_params_path)
+
+            
         time_elapsed = time.time() - since
         print(f'Training complete in {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s')
         print(f'Best val Acc: {best_acc:4f}')
