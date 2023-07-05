@@ -35,7 +35,7 @@ data_transforms = {
     ]),
 }
 
-data_dir = '../ant_face-data'
+data_dir = '../ant_face_data'
 image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                           data_transforms[x])
                   for x in ['train', 'val']}
