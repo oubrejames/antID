@@ -33,7 +33,6 @@ class EarlyStopper:
                 return True
         return False
 
-#######################################
 def train_one_epoch(model, data_loader, optimizer, criterion):
 
     model.train()  # Set model to training mode
@@ -98,7 +97,6 @@ def validate_one_epoch(model, data_loader, optimizer):
 
     return epoch_loss, epoch_acc
 
-
 # From https://pytorch.org/tutorials/beginner/transfer_learning_tutorial.html#convnet-as-fixed-feature-extractor
 def train_model(model, criterion, optimizer, scheduler, num_epochs=50):
     # Start measuring time of training
@@ -128,7 +126,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=50):
                 torch.save(model.state_dict(), best_model_params_path)
 
             if early_stopper.early_stop(val_loss):
-                print("Stopping early. Validation loss did not improve for {d} epochs.".format(early_stopper.patience))
+                print("Stopping early. Validation loss did not improve for {} epochs.".format(early_stopper.patience))
                 break
 
         time_elapsed = time.time() - since
@@ -141,7 +139,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=50):
 
 # Creating a CNN class
 class CNN(nn.Module):
-	#  Determine what layers and their order in CNN object 
+    #  Determine what layers and their order in CNN object 
     def __init__(self, num_classes):
         super(CNN, self).__init__()
         self.conv_layer1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3)
