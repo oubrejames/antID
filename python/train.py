@@ -135,7 +135,7 @@ class ConvNeuralNet(nn.Module):
         self.fc2 = nn.Linear(128, num_classes)
     
     # Progresses data across layers    
-    def forward(self, x):
+    def __call__(self, x):
         out = self.conv_layer1(x)
         out = self.conv_layer2(out)
         out = self.max_pool1(out)
