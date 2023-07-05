@@ -15,8 +15,27 @@ import os
 from PIL import Image
 from tempfile import TemporaryDirectory
 
+# From https://stackoverflow.com/questions/71998978/early-stopping-in-pytorch
+class EarlyStopper:
+    def __init__(self, patience=1, min_delta=0):
+        self.patience = patience
+        self.min_delta = min_delta
+        self.counter = 0
+        self.min_validation_loss = np.inf
 
+    def early_stop(self, validation_loss):
+        if validation_loss < self.min_validation_loss:
+            self.min_validation_loss = validation_loss
+            self.counter = 0
+        elif validation_loss > (self.min_validation_loss + self.min_delta):
+            self.counter += 1
+            if self.counter >= self.patience:
+                return True
+        return False
+
+# From https://pytorch.org/tutorials/beginner/transfer_learning_tutorial.html#convnet-as-fixed-feature-extractor
 def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
+    # Start measuring time of training
     since = time.time()
 
     # Create a temporary directory to save training checkpoints
@@ -64,7 +83,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
                     running_loss += loss.item() * inputs.size(0)
                     running_corrects += torch.sum(preds == labels.data)
                 if phase == 'train':
-                    scheduler.step()
+                    scheduler.step() # Update learning rate at the end of each epoch
 
                 epoch_loss = running_loss / dataset_sizes[phase]
                 epoch_acc = running_corrects.double() / dataset_sizes[phase]
@@ -87,7 +106,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
     return model
 
 # Creating a CNN class
-class ConvNeuralNet(nn.Module):
+class CNN(nn.Module):
 	#  Determine what layers and their order in CNN object 
     def __init__(self, num_classes):
         super(ConvNeuralNet, self).__init__()
@@ -142,13 +161,13 @@ data_transforms = {
         transforms.CenterCrop(375),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
-        # transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ]),
     'val': transforms.Compose([
         transforms.Resize(375),
         transforms.CenterCrop(375),
         transforms.ToTensor(),
-        # transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ]),
 }
 
@@ -168,7 +187,7 @@ class_names = image_datasets['train'].classes
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-model = ConvNeuralNet(len(class_names))
+model = CNN(len(class_names))
 model = model.to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer_ft = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
@@ -176,3 +195,50 @@ exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
 
 model_ft = train_model(model, criterion, optimizer_ft, exp_lr_scheduler,
                        num_epochs=25)
+
+
+#######################################
+def train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq=10)
+
+    model.train()  # Set model to training mode
+
+    running_loss = 0.0
+    running_corrects = 0
+
+    # Iterate over data.
+    for inputs, labels in dataloaders[phase]:
+        inputs = inputs.to(device)
+        labels = labels.to(device)
+
+        # zero the parameter gradients
+        optimizer.zero_grad()
+
+        # forward
+        # track history if only in train
+        with torch.set_grad_enabled(phase == 'train'):
+            outputs = model(inputs)
+            _, preds = torch.max(outputs, 1)
+            loss = criterion(outputs, labels)
+
+            # backward + optimize only if in training phase
+            if phase == 'train':
+                loss.backward()
+                optimizer.step()
+
+        # statistics
+        running_loss += loss.item() * inputs.size(0)
+        running_corrects += torch.sum(preds == labels.data)
+
+    scheduler.step() # Update learning rate at the end of each epoch
+
+    epoch_loss = running_loss / dataset_sizes[phase]
+    epoch_acc = running_corrects.double() / dataset_sizes[phase]
+
+    print(f'{phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}')
+
+    # deep copy the model
+    if phase == 'val' and epoch_acc > best_acc:
+        best_acc = epoch_acc
+        torch.save(model.state_dict(), best_model_params_path)
+    
+    return model, epoch_loss, epoch_acc
