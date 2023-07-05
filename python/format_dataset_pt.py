@@ -6,9 +6,9 @@ from sklearn.model_selection import train_test_split
 path_to_labeled_images = "../labeled_images"
 path_to_dataset = "../ant_face_data"
 
-train_dir = os.path.join(save_dir, 'train')
-test_dir = os.path.join(save_dir, 'test')
-val_dir = os.path.join(save_dir, 'val')
+train_dir = os.path.join(path_to_dataset, 'train')
+test_dir = os.path.join(path_to_dataset, 'test')
+val_dir = os.path.join(path_to_dataset, 'val')
 test_size = 0.2  # Test set size
 val_size = 0.25  # Validation set size (25% of the remaining data after the test split)
 random_state = 42
@@ -19,9 +19,9 @@ os.makedirs(test_dir, exist_ok=True)
 os.makedirs(val_dir, exist_ok=True)
 
 # Split the dataset into train, test, and validation sets
-labels = os.listdir(dataset_dir)
+labels = os.listdir(path_to_labeled_images)
 for label in labels:
-    label_dir = os.path.join(dataset_dir, label)
+    label_dir = os.path.join(path_to_labeled_images, label)
     train_label_dir = os.path.join(train_dir, label)
     test_label_dir = os.path.join(test_dir, label)
     val_label_dir = os.path.join(val_dir, label)
