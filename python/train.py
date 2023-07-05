@@ -33,6 +33,79 @@ class EarlyStopper:
                 return True
         return False
 
+#######################################
+def train_one_epoch(model, data_loader, optimizer, criterion):
+
+    model.train()  # Set model to training mode
+
+    running_loss = 0.0
+    running_corrects = 0
+
+    # Iterate over data.
+    for inputs, labels in data_loader:
+        inputs = inputs.to(device)
+        labels = labels.to(device)
+
+        # zero the parameter gradients
+        optimizer.zero_grad()
+
+        # forward
+        # track history if only in train
+        torch.set_grad_enabled(True):
+        outputs = model(inputs)
+        _, preds = torch.max(outputs, 1)
+        loss = criterion(outputs, labels)
+
+        # backward + optimize only if in training phase
+        loss.backward()
+        optimizer.step()
+
+        # statistics
+        running_loss += loss.item() * inputs.size(0)
+        running_corrects += torch.sum(preds == labels.data)
+
+    epoch_loss = running_loss / dataset_sizes[phase]
+    epoch_acc = running_corrects.double() / dataset_sizes[phase]
+
+    return model, epoch_loss, epoch_acc
+
+def validate_one_epoch(model, data_loader):
+
+    model.eval()   # Set model to evaluate mode
+
+    running_loss = 0.0
+    running_corrects = 0
+
+    # Iterate over data.
+    for inputs, labels in data_loader:
+        inputs = inputs.to(device)
+        labels = labels.to(device)
+
+        # zero the parameter gradients
+        optimizer.zero_grad()
+
+        torch.set_grad_enabled(False):
+        outputs = model(inputs)
+        _, preds = torch.max(outputs, 1)
+        loss = criterion(outputs, labels)
+
+        # statistics
+        running_loss += loss.item() * inputs.size(0)
+        running_corrects += torch.sum(preds == labels.data)
+
+    epoch_loss = running_loss / dataset_sizes[phase]
+    epoch_acc = running_corrects.double() / dataset_sizes[phase]
+
+    print(f'{phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}')
+
+    # deep copy the model
+    if epoch_acc > best_acc:
+        best_acc = epoch_acc
+        torch.save(model.state_dict(), best_model_params_path)
+
+    return epoch_loss, epoch_acc
+
+
 # From https://pytorch.org/tutorials/beginner/transfer_learning_tutorial.html#convnet-as-fixed-feature-extractor
 def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
     # Start measuring time of training
@@ -49,53 +122,12 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
             print(f'Epoch {epoch}/{num_epochs - 1}')
             print('-' * 10)
 
-            # Each epoch has a training and validation phase
-            for phase in ['train', 'val']:
-                if phase == 'train':
-                    model.train()  # Set model to training mode
-                else:
-                    model.eval()   # Set model to evaluate mode
+            model, train_loss, train_acc = train_one_epoch(model, dataloaders['train'], optimizer, criterion)
+            scheduler.step() # Update learning rate
 
-                running_loss = 0.0
-                running_corrects = 0
-
-                # Iterate over data.
-                for inputs, labels in dataloaders[phase]:
-                    inputs = inputs.to(device)
-                    labels = labels.to(device)
-
-                    # zero the parameter gradients
-                    optimizer.zero_grad()
-
-                    # forward
-                    # track history if only in train
-                    with torch.set_grad_enabled(phase == 'train'):
-                        outputs = model(inputs)
-                        _, preds = torch.max(outputs, 1)
-                        loss = criterion(outputs, labels)
-
-                        # backward + optimize only if in training phase
-                        if phase == 'train':
-                            loss.backward()
-                            optimizer.step()
-
-                    # statistics
-                    running_loss += loss.item() * inputs.size(0)
-                    running_corrects += torch.sum(preds == labels.data)
-                if phase == 'train':
-                    scheduler.step() # Update learning rate at the end of each epoch
-
-                epoch_loss = running_loss / dataset_sizes[phase]
-                epoch_acc = running_corrects.double() / dataset_sizes[phase]
-
-                print(f'{phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}')
-
-                # deep copy the model
-                if phase == 'val' and epoch_acc > best_acc:
-                    best_acc = epoch_acc
-                    torch.save(model.state_dict(), best_model_params_path)
-
-            print()
+            val_loss, val_acc = validate_one_epoch(model, dataloaders['val'])
+            print('Training Loss: {:.4f} Acc: {:.4f}'.format(train_loss, train_acc))
+            print('Validation Loss: {:.4f} Acc: {:.4f}'.format(val_loss, val_acc))
 
         time_elapsed = time.time() - since
         print(f'Training complete in {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s')
@@ -197,48 +229,4 @@ model_ft = train_model(model, criterion, optimizer_ft, exp_lr_scheduler,
                        num_epochs=25)
 
 
-#######################################
-def train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq=10)
 
-    model.train()  # Set model to training mode
-
-    running_loss = 0.0
-    running_corrects = 0
-
-    # Iterate over data.
-    for inputs, labels in dataloaders[phase]:
-        inputs = inputs.to(device)
-        labels = labels.to(device)
-
-        # zero the parameter gradients
-        optimizer.zero_grad()
-
-        # forward
-        # track history if only in train
-        with torch.set_grad_enabled(phase == 'train'):
-            outputs = model(inputs)
-            _, preds = torch.max(outputs, 1)
-            loss = criterion(outputs, labels)
-
-            # backward + optimize only if in training phase
-            if phase == 'train':
-                loss.backward()
-                optimizer.step()
-
-        # statistics
-        running_loss += loss.item() * inputs.size(0)
-        running_corrects += torch.sum(preds == labels.data)
-
-    scheduler.step() # Update learning rate at the end of each epoch
-
-    epoch_loss = running_loss / dataset_sizes[phase]
-    epoch_acc = running_corrects.double() / dataset_sizes[phase]
-
-    print(f'{phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}')
-
-    # deep copy the model
-    if phase == 'val' and epoch_acc > best_acc:
-        best_acc = epoch_acc
-        torch.save(model.state_dict(), best_model_params_path)
-    
-    return model, epoch_loss, epoch_acc
