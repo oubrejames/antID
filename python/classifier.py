@@ -20,7 +20,7 @@ print(face_df.head())
 # Read a single image (test)
 img_name = face_df.iloc[0, 0]
 print('Image name: {}'.format(img_name))
-
+print("Pandas head: ", face_df.head())
 # Dataset class for ant faces
 # https://pytorch.org/tutorials/beginner/data_loading_tutorial.html
 class AntFaceDataset(Dataset):
