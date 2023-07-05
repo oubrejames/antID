@@ -20,7 +20,7 @@ print(face_df.head())
 # Read a single image (test)
 img_name = face_df.iloc[0, 0]
 print('Image name: {}'.format(img_name))
-print("Pandas head: ", face_df.head())
+
 # Dataset class for ant faces
 # https://pytorch.org/tutorials/beginner/data_loading_tutorial.html
 class AntFaceDataset(Dataset):
@@ -198,8 +198,9 @@ total_step = len(train_loader)
 # Training loop
 for epoch in range(num_epochs):
 	#Load in the data in batches using the train_loader object
-    for i, (images, labels) in enumerate(train_loader):
+    for i, element in enumerate(train_loader):
         # Move tensors to the configured device
+        print("Element", element)
         print("Image", images)
         images = images.to(device)
         labels = labels.to(device)
