@@ -14,7 +14,6 @@ import time
 import os
 from PIL import Image
 from tempfile import TemporaryDirectory
-from torch import flatten
 
 cudnn.benchmark = True
 plt.ion()   # interactive mode
@@ -39,7 +38,7 @@ data_transforms = {
 data_dir = '../ant_face_data'
 image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                           data_transforms[x])
-                  for x in ['train', 'val',]}
+                  for x in ['train', 'val', 'test']}
 
 dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=4,
                                              shuffle=True, num_workers=4)
@@ -123,77 +122,37 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
 
 # Creating a CNN class
 class ConvNeuralNet(nn.Module):
-    #  Determine what layers and their order in CNN object 
+	#  Determine what layers and their order in CNN object 
     def __init__(self, num_classes):
         super(ConvNeuralNet, self).__init__()
-        # self.conv_layer1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3)
-        # self.conv_layer2 = nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3)
-        # self.max_pool1 = nn.MaxPool2d(kernel_size = 2, stride = 2)
+        self.conv_layer1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3)
+        self.conv_layer2 = nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3)
+        self.max_pool1 = nn.MaxPool2d(kernel_size = 2, stride = 2)
         
-        # self.conv_layer3 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3)
-        # self.conv_layer4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3)
-        # self.max_pool2 = nn.MaxPool2d(kernel_size = 2, stride = 2)
+        self.conv_layer3 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3)
+        self.conv_layer4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3)
+        self.max_pool2 = nn.MaxPool2d(kernel_size = 2, stride = 2)
         
-        # self.fc1 = nn.Linear(1600, 128)
-        # self.relu1 = nn.ReLU()
-        # self.fc2 = nn.Linear(128, num_classes)
-        
-        ## Py img search
-        # initialize first set of CONV => RELU => POOL layers
-        self.conv1 = nn.Conv2d(in_channels=3, out_channels=20,
-            kernel_size=(5, 5))
+        self.fc1 = nn.Linear(1600, 128)
         self.relu1 = nn.ReLU()
-        self.maxpool1 = nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
-        # initialize second set of CONV => RELU => POOL layers
-        self.conv2 = nn.Conv2d(in_channels=20, out_channels=50,
-            kernel_size=(5, 5))
-        self.relu2 = nn.ReLU()
-        self.maxpool2 = nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
-        # initialize first (and only) set of FC => RELU layers
-        self.fc1 = nn.Linear(in_features=800, out_features=500)
-        self.relu3 = nn.ReLU()
-        # initialize our softmax classifier
-        self.fc2 = nn.Linear(in_features=500, out_features=num_classes)
-        self.logSoftmax = nn.LogSoftmax(dim=1)
-
-    # # Progresses data across layers
-    # def __call__(self, x):
-    #     out = self.conv_layer1(x)
-    #     out = self.conv_layer2(out)
-    #     out = self.max_pool1(out)
+        self.fc2 = nn.Linear(128, num_classes)
+    
+    # Progresses data across layers    
+    def __call__(self, x):
+        out = self.conv_layer1(x)
+        out = self.conv_layer2(out)
+        out = self.max_pool1(out)
         
-    #     out = self.conv_layer3(out)
-    #     out = self.conv_layer4(out)
-    #     out = self.max_pool2(out)
+        out = self.conv_layer3(out)
+        out = self.conv_layer4(out)
+        out = self.max_pool2(out)
                 
-    #     out = out.reshape(out.size(0), -1)
+        out = out.reshape(out.size(0), -1)
         
-    #     out = self.fc1(out)
-    #     out = self.relu1(out)
-    #     out = self.fc2(out)
-    #     return out
-    def forward(self, x):
-        # pass the input through our first set of CONV => RELU =>
-        # POOL layers
-        x = self.conv1(x)
-        x = self.relu1(x)
-        x = self.maxpool1(x)
-        # pass the output from the previous layer through the second
-        # set of CONV => RELU => POOL layers
-        x = self.conv2(x)
-        x = self.relu2(x)
-        x = self.maxpool2(x)
-        # flatten the output from the previous layer and pass it
-        # through our only set of FC => RELU layers
-        x = flatten(x, 1)
-        x = self.fc1(x)
-        x = self.relu3(x)
-        # pass the output to our softmax classifier to get our output
-        # predictions
-        x = self.fc2(x)
-        output = self.logSoftmax(x)
-        # return the output predictions
-        return output
+        out = self.fc1(out)
+        out = self.relu1(out)
+        out = self.fc2(out)
+        return out
 
 model = ConvNeuralNet(len(class_names))
 model = model.to(device)
