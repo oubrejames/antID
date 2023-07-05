@@ -52,6 +52,9 @@ class AntFaceDataset(Dataset):
         # id = id.split("_")[-1] # Get the last character of the id (the number) 
         sample = {'id':id, 'image': image}
 
+        if self.transform:
+            sample = self.transform(sample)
+
         return sample
 
 class Rescale(object):
