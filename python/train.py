@@ -103,7 +103,7 @@ class ConvNeuralNet(nn.Module):
         self.conv_layer6 = nn.Conv2d(in_channels=128, out_channels=128, kernel_size=3)
         self.max_pool3 = nn.MaxPool2d(kernel_size = 2, stride = 2)
 
-        self.fc1 = nn.Linear(518400, 128)
+        self.fc1 = nn.Linear(self.max_pool3.shape[1] , 128)
         self.relu1 = nn.ReLU()
         self.fc2 = nn.Linear(128, num_classes)
         self.relu2 = nn.ReLU()
