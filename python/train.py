@@ -15,42 +15,6 @@ import os
 from PIL import Image
 from tempfile import TemporaryDirectory
 
-cudnn.benchmark = True
-plt.ion()   # interactive mode
-
-# Data augmentation and normalization for training
-# Just normalization for validation
-data_transforms = {
-    'train': transforms.Compose([
-        transforms.Resize(375),
-        # transforms.RandomResizedCrop(224),
-        transforms.CenterCrop(375),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-    ]),
-    'val': transforms.Compose([
-        transforms.Resize(375),
-        transforms.CenterCrop(375),
-        transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-    ]),
-}
-
-data_dir = '../ant_face_data'
-image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
-                                          data_transforms[x])
-                  for x in ['train', 'val']}
-
-dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=4,
-                                             shuffle=True, num_workers=4)
-              for x in ['train', 'val']}
-
-dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
-
-class_names = image_datasets['train'].classes
-
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
     since = time.time()
@@ -134,13 +98,19 @@ class ConvNeuralNet(nn.Module):
         self.conv_layer3 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3)
         self.conv_layer4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3)
         self.max_pool2 = nn.MaxPool2d(kernel_size = 2, stride = 2)
-        
+
+        self.conv_layer5 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3)
+        self.conv_layer6 = nn.Conv2d(in_channels=128, out_channels=128, kernel_size=3)
+        self.max_pool3 = nn.MaxPool2d(kernel_size = 2, stride = 2)
+
         self.fc1 = nn.Linear(518400, 128)
         self.relu1 = nn.ReLU()
         self.fc2 = nn.Linear(128, num_classes)
-    
+        self.relu2 = nn.ReLU()
+        self.fc3 = nn.Linear(128, num_classes)
+
     # Progresses data across layers    
-    def __call__(self, x):
+    def forward(self, x):
         out = self.conv_layer1(x)
         out = self.conv_layer2(out)
         out = self.max_pool1(out)
@@ -148,13 +118,55 @@ class ConvNeuralNet(nn.Module):
         out = self.conv_layer3(out)
         out = self.conv_layer4(out)
         out = self.max_pool2(out)
-                
+        
+        out = self.conv_layer5(out)
+        out = self.conv_layer6(out)
+        out = self.max_pool3(out)
+
         out = out.reshape(out.size(0), -1)
         
         out = self.fc1(out)
         out = self.relu1(out)
         out = self.fc2(out)
+        out = self.relu2(out)
+        out = self.fc3(out)
         return out
+
+cudnn.benchmark = True
+
+# Data augmentation and normalization for training
+# Just normalization for validation
+data_transforms = {
+    'train': transforms.Compose([
+        transforms.Resize(375),
+        transforms.CenterCrop(375),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ]),
+    'val': transforms.Compose([
+        transforms.Resize(375),
+        transforms.CenterCrop(375),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ]),
+}
+
+data_dir = '../ant_face_data'
+image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
+                                          data_transforms[x])
+                  for x in ['train', 'val']}
+
+dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=4,
+                                             shuffle=True, num_workers=4)
+              for x in ['train', 'val']}
+
+dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
+
+class_names = image_datasets['train'].classes
+
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 
 model = ConvNeuralNet(len(class_names))
 model = model.to(device)
