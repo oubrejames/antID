@@ -69,7 +69,7 @@ def train_one_epoch(model, data_loader, optimizer, criterion):
 
     return model, epoch_loss, epoch_acc
 
-def validate_one_epoch(model, data_loader):
+def validate_one_epoch(model, data_loader, optimizer):
 
     model.eval()   # Set model to evaluate mode
 
@@ -123,7 +123,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
             model, train_loss, train_acc = train_one_epoch(model, dataloaders['train'], optimizer, criterion)
             scheduler.step() # Update learning rate
 
-            val_loss, val_acc = validate_one_epoch(model, dataloaders['val'])
+            val_loss, val_acc = validate_one_epoch(model, dataloaders['val'], optimizer)
             print('Training Loss: {:.4f} Acc: {:.4f}'.format(train_loss, train_acc))
             print('Validation Loss: {:.4f} Acc: {:.4f}'.format(val_loss, val_acc))
 
