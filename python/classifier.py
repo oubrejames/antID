@@ -200,10 +200,8 @@ for epoch in range(num_epochs):
 	#Load in the data in batches using the train_loader object
     for i, element in enumerate(train_loader):
         # Move tensors to the configured device
-        print("Element", element)
-        print("Image", images)
-        images = images.to(device)
-        labels = labels.to(device)
+        images = element['image'].to(device)
+        labels = element['id'].to(device)
         
         # Forward pass
         outputs = model(images)
