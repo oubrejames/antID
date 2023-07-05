@@ -51,7 +51,7 @@ def train_one_epoch(model, data_loader, optimizer, criterion):
 
         # forward
         # track history if only in train
-        torch.set_grad_enabled(True):
+        torch.set_grad_enabled(True)
         outputs = model(inputs)
         _, preds = torch.max(outputs, 1)
         loss = criterion(outputs, labels)
@@ -84,7 +84,7 @@ def validate_one_epoch(model, data_loader):
         # zero the parameter gradients
         optimizer.zero_grad()
 
-        torch.set_grad_enabled(False):
+        torch.set_grad_enabled(False)
         outputs = model(inputs)
         _, preds = torch.max(outputs, 1)
         loss = criterion(outputs, labels)
