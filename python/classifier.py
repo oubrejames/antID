@@ -146,7 +146,7 @@ num_epochs = 20
 face_dataset = AntFaceDataset(csv_file='../ant_faces_dataset/faces/labels.csv',
                                     root_dir='../ant_faces_dataset/faces/',
                                     transform=transforms.Compose([
-                                        Rescale(375),
+                                        Rescale(300),
                                         ToTensor()
                                     ]))
 
