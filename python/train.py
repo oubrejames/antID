@@ -107,7 +107,7 @@ class ConvNeuralNet(nn.Module):
         self.relu1 = nn.ReLU()
         self.fc2 = nn.Linear(128, num_classes)
         self.relu2 = nn.ReLU()
-        self.fc3 = nn.Linear(128, num_classes)
+        self.fc3 = nn.Linear(11, num_classes)
 
     # Progresses data across layers    
     def forward(self, x):
