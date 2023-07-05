@@ -100,7 +100,7 @@ def validate_one_epoch(model, data_loader, optimizer):
 
 
 # From https://pytorch.org/tutorials/beginner/transfer_learning_tutorial.html#convnet-as-fixed-feature-extractor
-def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
+def train_model(model, criterion, optimizer, scheduler, num_epochs=50):
     # Start measuring time of training
     since = time.time()
 
@@ -110,7 +110,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
 
         torch.save(model.state_dict(), best_model_params_path)
         best_acc = 0.0
-
+        early_stopper = EarlyStopper(patience=3, min_delta=0.01)
         for epoch in range(num_epochs):
             print(f'Epoch {epoch}/{num_epochs - 1}')
             print('-' * 10)
@@ -121,6 +121,10 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
             val_loss, val_acc = validate_one_epoch(model, dataloaders['val'], optimizer)
             print('Training Loss: {:.4f} Acc: {:.4f}'.format(train_loss, train_acc))
             print('Validation Loss: {:.4f} Acc: {:.4f}'.format(val_loss, val_acc))
+
+            if early_stopper.early_stop(val_loss):
+                print("Stopping early. Validation loss did not improve for {} epochs.", early_stopper.patience)
+                break
 
                 # deep copy the model
             if val_acc > best_acc:
