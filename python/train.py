@@ -1,6 +1,3 @@
-# License: BSD
-# Author: Sasank Chilamkurthy
-
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -183,6 +180,45 @@ class CNN(nn.Module):
         out = self.fc3(out)
         return out
 
+# Creating a CNN class
+class SiameseNet(nn.Module):
+    #  Determine what layers and their order in CNN object 
+    def __init__(self):
+        super(SiameseNet, self).__init__()
+        self.conv_layer1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3)
+        self.conv_layer2 = nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3)
+        self.max_pool1 = nn.MaxPool2d(kernel_size = 2, stride = 2)
+
+        self.conv_layer3 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3)
+        self.conv_layer4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3)
+        self.max_pool2 = nn.MaxPool2d(kernel_size = 2, stride = 2)
+
+        self.conv_layer5 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3)
+        self.conv_layer6 = nn.Conv2d(in_channels=128, out_channels=128, kernel_size=3)
+        self.max_pool3 = nn.MaxPool2d(kernel_size = 2, stride = 2)
+
+        self.fc1 = nn.Linear(236672 , 128)
+
+    # Progresses data across layers    
+    def forward(self, x):
+        out = self.conv_layer1(x)
+        out = self.conv_layer2(out)
+        out = self.max_pool1(out)
+        
+        out = self.conv_layer3(out)
+        out = self.conv_layer4(out)
+        out = self.max_pool2(out)
+        
+        out = self.conv_layer5(out)
+        out = self.conv_layer6(out)
+        out = self.max_pool3(out)
+
+        out = out.reshape(out.size(0), -1)
+
+        out = self.fc1(out)
+
+        return out
+
 cudnn.benchmark = True
 
 # Data augmentation and normalization for training
@@ -193,15 +229,16 @@ data_transforms = {
         transforms.CenterCrop(375),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        transforms.Normalize([-0.1839, -0.3908, -0.3304], [0.5050, 0.5857, 0.6100])
     ]),
     'val': transforms.Compose([
         transforms.Resize(375),
         transforms.CenterCrop(375),
         transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        transforms.Normalize([-0.1839, -0.3908, -0.3304], [0.5050, 0.5857, 0.6100])
     ]),
 }
+
 
 data_dir = '../ant_face_data'
 image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
