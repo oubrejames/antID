@@ -40,7 +40,7 @@ nb_samples = 0.
 for loader in dataloaders.values():
     print("loader: ", loader)
     for data in loader:
-        print("data: ", data)
+        print("data type: ", type(data))
         batch_samples = data.size(0)
         data = data.view(batch_samples, data.size(1), -1)
         mean += data.mean(2).sum(0)
