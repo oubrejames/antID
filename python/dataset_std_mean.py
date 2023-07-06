@@ -41,7 +41,7 @@ for loader in dataloaders.values():
     for i, data in enumerate(loader, 0):
         # get the inputs; data is a list of [inputs, labels]
         inputs, labels = data
-        data = torch.FloatTensor(inputs)
+        data = torch.Tensor(inputs)
         batch_samples = data.size(0)
         data = data.view(batch_samples, data.size(1), -1)
         mean += data.mean(2).sum(0)
