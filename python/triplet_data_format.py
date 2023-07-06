@@ -296,6 +296,7 @@ random_state = 42
 # os.makedirs(train_dir, exist_ok=True)
 # os.makedirs(test_dir, exist_ok=True)
 # os.makedirs(val_dir, exist_ok=True)
+os.makedirs(path_to_dataset, exist_ok=True)
 
 # Split the dataset into train, test, and validation sets
 all_ants = os.listdir(path_to_labeled_images)
