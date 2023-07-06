@@ -280,22 +280,22 @@ import csv
 path_to_labeled_images = "../labeled_images"
 path_to_dataset = "../triplet_dataset"
 
-train_dir = os.path.join(path_to_dataset, 'train')
-test_dir = os.path.join(path_to_dataset, 'test')
-val_dir = os.path.join(path_to_dataset, 'val')
+# train_dir = os.path.join(path_to_dataset, 'train')
+# test_dir = os.path.join(path_to_dataset, 'test')
+# val_dir = os.path.join(path_to_dataset, 'val')
 
-os.makedirs(train_label_dir, exist_ok=True)
-os.makedirs(test_label_dir, exist_ok=True)
-os.makedirs(val_label_dir, exist_ok=True)
+# os.makedirs(train_label_dir, exist_ok=True)
+# os.makedirs(test_label_dir, exist_ok=True)
+# os.makedirs(val_label_dir, exist_ok=True)
 
 test_size = 0.2  # Test set size
 val_size = 0.25  # Validation set size (25% of the remaining data after the test split)
 random_state = 42
 
-# Create the train, test, and validation directories
-os.makedirs(train_dir, exist_ok=True)
-os.makedirs(test_dir, exist_ok=True)
-os.makedirs(val_dir, exist_ok=True)
+# # Create the train, test, and validation directories
+# os.makedirs(train_dir, exist_ok=True)
+# os.makedirs(test_dir, exist_ok=True)
+# os.makedirs(val_dir, exist_ok=True)
 
 # Split the dataset into train, test, and validation sets
 all_ants = os.listdir(path_to_labeled_images)
