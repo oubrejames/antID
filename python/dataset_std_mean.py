@@ -38,6 +38,7 @@ mean = 0.
 std = 0.
 nb_samples = 0.
 for loader in dataloaders.values():
+    print("loader: ", loader)
     for data in loader:
         batch_samples = data.size(0)
         data = data.view(batch_samples, data.size(1), -1)
