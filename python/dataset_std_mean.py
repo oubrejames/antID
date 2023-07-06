@@ -38,8 +38,10 @@ mean = 0.
 std = 0.
 nb_samples = 0.
 for loader in dataloaders.values():
-    for data in loader:
-        data = torch.FloatTensor(data[0])
+    for i, data in enumerate(loader, 0):
+        # get the inputs; data is a list of [inputs, labels]
+        inputs, labels = data
+        data = torch.FloatTensor(inputs)
         batch_samples = data.size(0)
         data = data.view(batch_samples, data.size(1), -1)
         mean += data.mean(2).sum(0)
