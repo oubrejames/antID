@@ -312,13 +312,13 @@ with open(os.path.join(path_to_dataset, "triplets.csv"), "a") as f:
 
 # Loop through each ant folder
 for ant_dir in all_ants:
-    positive_imgs = os.path.join(path_to_labeled_images, ant_dir)
-    positive_imgs = os.listdir(positive_imgs)
+    positive_imgs_path = os.path.join(path_to_labeled_images, ant_dir)
+    positive_imgs = os.listdir(positive_imgs_path)
     
     # Loop through each image of the ant
     for anchor_img in positive_imgs:
         # Copy each image to the dataset directory
-        src_path = os.path.join(label_dir, anchor_img)
+        src_path = os.path.join(positive_imgs_path, anchor_img)
         dst_path = os.path.join(path_to_dataset, anchor_img)
         shutil.copy(src_path, dst_path)
         
