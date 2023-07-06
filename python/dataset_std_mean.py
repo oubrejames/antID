@@ -3,7 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
- 
+from torchvision import datasets, models, transforms
+
 # Data augmentation and normalization for training
 # Just normalization for validation
 data_transforms = {
