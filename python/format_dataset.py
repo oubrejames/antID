@@ -43,7 +43,7 @@ for label in labels:
     
     # Write image paths and labels to csv file
     for image_file in image_files:
-        row = [label, os.path.join(dst_label_dir, image_file)]
+        row = [label, os.path.join(label, image_file)]
         with open(os.path.join(path_to_dataset, "labels.csv"), "a") as f:
             writer = csv.writer(f)
             writer.writerow(row)
