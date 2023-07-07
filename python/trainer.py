@@ -140,8 +140,7 @@ def fit(model, dataloaders, criterion, optimizer, scheduler, device, num_epochs=
 def train_one_epoch_triplet(model, data_loader, optimizer, criterion, device):
     running_loss = 0.0
     
-    for data, label in data_loader:
-        anchor, positive, negative, label = data
+    for anchor, positive, negative, label in data_loader:
         anchor, positive, negative = anchor.to(device), positive.to(device), negative.to(device)
         
         optimizer.zero_grad()
@@ -157,8 +156,7 @@ def train_one_epoch_triplet(model, data_loader, optimizer, criterion, device):
 def validate_one_epoch_triplet(model, data_loader, optimizer, criterion, device):
     running_loss = 0.0
     
-    for data, label in data_loader:
-        anchor, positive, negative, label = data
+    for anchor, positive, negative, label in data_loader:
         anchor, positive, negative = anchor.to(device), positive.to(device), negative.to(device)
         
         optimizer.zero_grad()
