@@ -33,6 +33,7 @@ for label in labels:
     train_label_dir = os.path.join(train_dir, label)
     test_label_dir = os.path.join(test_dir, label)
     val_label_dir = os.path.join(val_dir, label)
+    dst_label_dir = os.path.join(path_to_dataset, label)
     os.makedirs(train_label_dir, exist_ok=True)
     os.makedirs(test_label_dir, exist_ok=True)
     os.makedirs(val_label_dir, exist_ok=True)
@@ -46,20 +47,25 @@ for label in labels:
             writer = csv.writer(f)
             writer.writerow(row)
 
-    train_files, test_val_files = train_test_split(image_files, test_size=test_size, random_state=random_state)
-    test_files, val_files = train_test_split(test_val_files, test_size=val_size/(1-test_size), random_state=random_state)
-
-    for file in train_files:
-        src_path = os.path.join(label_dir, file)
-        dst_path = os.path.join(train_label_dir, file)
+        # Save images to labeled dataset
+        src_path = os.path.join(label_dir, image_file)
+        dst_path = os.path.join(dst_label_dir, image_file)
         shutil.copy(src_path, dst_path)
 
-    for file in test_files:
-        src_path = os.path.join(label_dir, file)
-        dst_path = os.path.join(test_label_dir, file)
-        shutil.copy(src_path, dst_path)
+    # train_files, test_val_files = train_test_split(image_files, test_size=test_size, random_state=random_state)
+    # test_files, val_files = train_test_split(test_val_files, test_size=val_size/(1-test_size), random_state=random_state)
 
-    for file in val_files:
-        src_path = os.path.join(label_dir, file)
-        dst_path = os.path.join(val_label_dir, file)
-        shutil.copy(src_path, dst_path)
+    # for file in train_files:
+    #     src_path = os.path.join(label_dir, file)
+    #     dst_path = os.path.join(train_label_dir, file)
+    #     shutil.copy(src_path, dst_path)
+
+    # for file in test_files:
+    #     src_path = os.path.join(label_dir, file)
+    #     dst_path = os.path.join(test_label_dir, file)
+    #     shutil.copy(src_path, dst_path)
+
+    # for file in val_files:
+    #     src_path = os.path.join(label_dir, file)
+    #     dst_path = os.path.join(val_label_dir, file)
+    #     shutil.copy(src_path, dst_path)
