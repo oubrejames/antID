@@ -136,3 +136,76 @@ def fit(model, dataloaders, criterion, optimizer, scheduler, device, num_epochs=
         # load best model weights
         model.load_state_dict(torch.load(best_model_params_path))
     return model
+
+def train_one_epoch_triplet(model, data_loader, optimizer, criterion, device):
+    running_loss = 0.0
+    
+    for data, label in data_loader:
+        anchor, positive, negative, label = data
+        anchor, positive, negative = anchor.to(device), positive.to(device), negative.to(device)
+        
+        optimizer.zero_grad()
+        anchor_output, positive_output, negative_output = model(anchor), model(positive), model(negative)
+        loss = criterion(anchor_output, positive_output, negative_output)
+        loss.backward()
+        optimizer.step()
+        
+        running_loss += loss.item()
+    
+    return loss.item() / len(data_loader.dataset)
+
+def validate_one_epoch_triplet(model, data_loader, optimizer, criterion, device):
+    running_loss = 0.0
+    
+    for data, label in data_loader:
+        anchor, positive, negative, label = data
+        anchor, positive, negative = anchor.to(device), positive.to(device), negative.to(device)
+        
+        optimizer.zero_grad()
+        anchor_output, positive_output, negative_output = model(anchor), model(positive), model(negative)
+        loss = criterion(anchor_output, positive_output, negative_output)
+        
+        running_loss += loss.item()
+    
+    return loss.item() / len(data_loader.dataset)
+
+def fit_triplet(model, dataloaders, criterion, optimizer, scheduler, device, num_epochs=50):
+    # Start measuring time of training
+    since = time.time()
+
+    # Create a temporary directory to save training checkpoints
+    with TemporaryDirectory() as tempdir:
+        best_model_params_path = os.path.join(tempdir, 'best_model_params.pt')
+
+        torch.save(model.state_dict(), best_model_params_path)
+        best_acc = 0.0
+        # early_stopper = EarlyStopper(patience=15, min_delta=0.001)
+        for epoch in range(num_epochs):
+            print(f'Epoch {epoch}/{num_epochs - 1}')
+            print('-' * 10)
+
+            model.train(True)
+            train_loss = train_one_epoch_triplet(model, dataloaders['train'], optimizer, criterion, device)
+            scheduler.step() # Update learning rate
+
+            model.train(False)
+            val_loss = validate_one_epoch_triplet(model, dataloaders['val'], optimizer, criterion, device)
+            print('Training Loss: {:.4f}'.format(train_loss))
+            print('Validation Loss: {:.4f}'.format(val_loss))
+
+                # deep copy the model
+            if val_loss > best_acc:
+                best_acc = val_loss
+                torch.save(model.state_dict(), best_model_params_path)
+
+            if early_stopper.early_stop(val_loss):
+                print("Stopping early. Validation loss did not improve for {} epochs.".format(early_stopper.patience))
+                break
+
+        time_elapsed = time.time() - since
+        print(f'Training complete in {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s')
+        # print(f'Best val Acc: {best_acc:4f}')
+
+        # load best model weights
+        model.load_state_dict(torch.load(best_model_params_path))
+    return model
