@@ -15,7 +15,7 @@ from torch.utils.data import Dataset, DataLoader
 import pandas as pd
 from skimage import io, transform
 import random
-
+from PIL import Image
 class TripletAntsDataset(Dataset):
     """"""
 
@@ -42,7 +42,8 @@ class TripletAntsDataset(Dataset):
                                 self.labels.iloc[idx, 0],       # Directory to specific ant folder
                                 self.labels.iloc[idx, 1])       # Filename of anchor image
 
-        anchor_image = io.imread(anchor_path)
+        # anchor_image = io.imread(anchor_path)
+        anchor_image = Image.open(anchor_path)
 
         positive_path = anchor_path
         while positive_path == anchor_path:
@@ -51,8 +52,9 @@ class TripletAntsDataset(Dataset):
                                          self.labels.iloc[idx, 0], 
                                          pos_img_name)
 
-        positive_image = io.imread(positive_path)
-
+        # positive_image = io.imread(positive_path)
+        positive_image = Image.open(positive_path)
+    
         positive_dir=  os.path.join(self.root_dir,               # Directory to all ant folders
                                 self.labels.iloc[idx, 0])       # Directory to specific ant folder
         negative_dir = positive_dir
@@ -62,7 +64,8 @@ class TripletAntsDataset(Dataset):
             neg_img_name = random.choice(os.listdir(negative_dir))
             negative_path = os.path.join(negative_dir, neg_img_name)
 
-        negative_image = io.imread(negative_path)
+        # negative_image = io.imread(negative_path)
+        negative_image = Image.open(negative_path)
 
         # sample = {'anchor': anchor_image,
         #           'positive': positive_image,
