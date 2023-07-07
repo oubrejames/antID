@@ -45,7 +45,7 @@ data_transforms = {
 
 data_dir = '../ant_face_data'
 csv_file = '../ant_face_data/labels.csv'
-dataset = TripletAntsDataset(csv_file, data_dir)
+dataset = TripletAntsDataset(csv_file, data_dir, transform=data_transforms['val'])
 
 train_size = int(0.8 * len(dataset))
 val_size = int(0.1 * len(dataset))
