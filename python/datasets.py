@@ -14,6 +14,8 @@ from tempfile import TemporaryDirectory
 from torch.utils.data import Dataset, DataLoader
 import pandas as pd
 from skimage import io, transform
+import random
+
 class TripletAntsDataset(Dataset):
     """"""
 
