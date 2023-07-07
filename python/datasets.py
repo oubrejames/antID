@@ -60,10 +60,11 @@ class TripletAntsDataset(Dataset):
         negative_dir = positive_dir
         while negative_dir == positive_dir:
             negative_dir = random.choice(os.listdir(self.root_dir))
-            negative_dir = os.path.join(self.root_dir, negative_dir)
-            print("NEGATIVE DIR: ", negative_dir)
-            neg_img_name = random.choice(os.listdir(negative_dir))
-            negative_path = os.path.join(negative_dir, neg_img_name)
+            if os.path.isfile(negative_dir):
+                negative_dir = positive_dir
+            negative_dir_path = os.path.join(self.root_dir, negative_dir_path)
+            neg_img_name = random.choice(os.listdir(negative_dir_path))
+            negative_path = os.path.join(negative_dir_path, neg_img_name)
 
         # negative_image = io.imread(negative_path)
         negative_image = Image.open(negative_path)
