@@ -44,22 +44,22 @@ class TripletAntsDataset(Dataset):
 
         anchor_image = io.imread(anchor_path)
 
-        positive_path = anchor_path
-        while positive_path == anchor_path:
-            pos_img_name = random.choice(os.listdir(os.path.join(self.root_dir, self.labels.iloc[idx, 0])))
-            positive_path = os.path.join(self.root_dir, self.labels.iloc[idx, 0], pos_img_name)
+        # positive_path = anchor_path
+        # while positive_path == anchor_path:
+        #     pos_img_name = random.choice(os.listdir(os.path.join(self.root_dir, self.labels.iloc[idx, 0])))
+        #     positive_path = os.path.join(self.root_dir, self.labels.iloc[idx, 0], pos_img_name)
 
-        positive_image = io.imread(positive_path)
+        # positive_image = io.imread(positive_path)
 
-        positive_dir=  os.path.join(self.root_dir,               # Directory to all ant folders
-                                self.labels.iloc[idx, 0])       # Directory to specific ant folder
-        negattive_dir = positive_dir
-        while negative_dir == positive_dir:
-            negative_dir = random.choice(os.listdir(self.root_dir))
-            neg_img_name = random.choice(os.listdir(os.path.join(self.root_dir, negative_dir)))
-            negative_path = os.path.join(self.root_dir, negative_dir, neg_img_name)
+        # positive_dir=  os.path.join(self.root_dir,               # Directory to all ant folders
+        #                         self.labels.iloc[idx, 0])       # Directory to specific ant folder
+        # negattive_dir = positive_dir
+        # while negative_dir == positive_dir:
+        #     negative_dir = random.choice(os.listdir(self.root_dir))
+        #     neg_img_name = random.choice(os.listdir(os.path.join(self.root_dir, negative_dir)))
+        #     negative_path = os.path.join(self.root_dir, negative_dir, neg_img_name)
 
-        negative_image = io.imread(negative_path)
+        # negative_image = io.imread(negative_path)
 
         # sample = {'anchor': anchor_image,
         #           'positive': positive_image,
@@ -75,4 +75,5 @@ class TripletAntsDataset(Dataset):
             positive_image = self.transform(positive_image)
             negative_image = self.transform(negative_image)
 
-        return anchor_image, positive_image, negative_image, self.labels.iloc[idx, 0]
+        # return anchor_image, positive_image, negative_image, self.labels.iloc[idx, 0]
+        return anchor_image, anchor_image, anchor_image, self.labels.iloc[idx, 0]
