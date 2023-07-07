@@ -174,9 +174,11 @@ def fit_triplet(model, dataloaders, criterion, optimizer, scheduler, device, num
     # Create a temporary directory to save training checkpoints
     with TemporaryDirectory() as tempdir:
         best_model_params_path = os.path.join(tempdir, 'best_model_params.pt')
-
+        model = model.to(device)
         torch.save(model.state_dict(), best_model_params_path)
         best_acc = 0.0
+        
+        
         # early_stopper = EarlyStopper(patience=15, min_delta=0.001)
         for epoch in range(num_epochs):
             print(f'Epoch {epoch}/{num_epochs - 1}')
