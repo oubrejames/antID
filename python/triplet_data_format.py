@@ -317,10 +317,10 @@ for ant_dir in all_ants:
     
     # Loop through each image of the ant
     for anchor_img in positive_imgs:
-        # # Copy each image to the dataset directory
-        # src_path = os.path.join(positive_imgs_path, anchor_img)
-        # dst_path = os.path.join(path_to_dataset, anchor_img)
-        # shutil.copy(src_path, dst_path)
+        # Copy each image to the dataset directory
+        src_path = os.path.join(positive_imgs_path, anchor_img)
+        dst_path = os.path.join(path_to_dataset, anchor_img)
+        shutil.copy(src_path, dst_path)
         
         # Loop through every other image of the same ant
         for pos_img in positive_imgs:
