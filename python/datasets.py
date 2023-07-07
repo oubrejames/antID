@@ -11,8 +11,9 @@ import time
 import os
 from PIL import Image
 from tempfile import TemporaryDirectory
+from torch.utils.data import Dataset, DataLoader
 
-class TripletAntsDataset(datasets):
+class TripletAntsDataset(Dataset):
     """"""
 
     def __init__(self, csv_file, root_dir, transform=None):
