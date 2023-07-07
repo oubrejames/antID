@@ -57,7 +57,10 @@ class TripletAntsDataset(Dataset):
 
         negative_image = io.imread(negative_path)
 
-        sample = {'anchor': anchor_image, 'positive': positive_image, 'negative': negative_image, 'label': self.labels.iloc[idx, 0]}
+        sample = {'anchor': anchor_image,
+                  'positive': positive_image,
+                  'negative': negative_image,
+                  'label': self.labels.iloc[idx, 0]}
 
         if self.transform:
             sample = {'anchor':  self.transform(anchor_image),
