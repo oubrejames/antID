@@ -63,13 +63,13 @@ def train_one_epoch(model, data_loader, optimizer, criterion, device):
         running_loss += loss.item() * inputs.size(0)
         running_corrects += torch.sum(preds == labels.data)
 
-    epoch_loss = running_loss / dataset_sizes['train']
-    epoch_acc = running_corrects.double() / dataset_sizes['train']
+    epoch_loss = running_loss / dataset_size
+    epoch_acc = running_corrects.double() / dataset_size
 
     return model, epoch_loss, epoch_acc
 
 def validate_one_epoch(model, data_loader, optimizer, criterion, device):
-    dataset_sizes = len(data_loader.dataset)
+    dataset_size = len(data_loader.dataset)
 
     model.eval()   # Set model to evaluate mode
 
@@ -93,8 +93,8 @@ def validate_one_epoch(model, data_loader, optimizer, criterion, device):
         running_loss += loss.item() * inputs.size(0)
         running_corrects += torch.sum(preds == labels.data)
 
-    epoch_loss = running_loss / dataset_sizes['val']
-    epoch_acc = running_corrects.double() / dataset_sizes['val']
+    epoch_loss = running_loss / dataset_size
+    epoch_acc = running_corrects.double() / dataset_size
 
     return epoch_loss, epoch_acc
 
