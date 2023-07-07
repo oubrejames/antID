@@ -52,7 +52,7 @@ for label in labels:
         src_path = os.path.join(label_dir, image_file)
         # dst_path = os.path.join(dst_label_dir, image_file)
         os.makedirs(dst_label_dir, exist_ok=True)
-        shutil.copy(src_path, dst_label_dir)
+        shutil.copy(src_path, label)
 
     # train_files, test_val_files = train_test_split(image_files, test_size=test_size, random_state=random_state)
     # test_files, val_files = train_test_split(test_val_files, test_size=val_size/(1-test_size), random_state=random_state)
