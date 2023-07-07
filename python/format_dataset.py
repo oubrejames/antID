@@ -2,6 +2,7 @@ import pandas as pd
 import os
 import shutil
 from sklearn.model_selection import train_test_split
+import csv
 
 path_to_labeled_images = "../labeled_images"
 path_to_dataset = "../ant_face_data"
@@ -18,6 +19,13 @@ os.makedirs(train_dir, exist_ok=True)
 os.makedirs(test_dir, exist_ok=True)
 os.makedirs(val_dir, exist_ok=True)
 
+# Create csv file with image paths and labels
+head = ['label', 'img_path']
+
+with open(os.path.join(path_to_dataset, "labels.csv"), "a") as f:
+    writer = csv.writer(f)
+    writer.writerow(head)
+
 # Split the dataset into train, test, and validation sets
 labels = os.listdir(path_to_labeled_images)
 for label in labels:
@@ -30,6 +38,14 @@ for label in labels:
     os.makedirs(val_label_dir, exist_ok=True)
 
     image_files = os.listdir(label_dir)
+    
+    # Write image paths and labels to csv file
+    for image_file in image_files:
+        row = [label, os.path.join(label_dir, image_file)]
+        with open(os.path.join(path_to_dataset, "labels.csv"), "a") as f:
+            writer = csv.writer(f)
+            writer.writerow(row)
+
     train_files, test_val_files = train_test_split(image_files, test_size=test_size, random_state=random_state)
     test_files, val_files = train_test_split(test_val_files, test_size=val_size/(1-test_size), random_state=random_state)
 
