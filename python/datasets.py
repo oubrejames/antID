@@ -12,7 +12,7 @@ import os
 from PIL import Image
 from tempfile import TemporaryDirectory
 
-class TripletAntsDataset(Dataset):
+class TripletAntsDataset(datasets):
     """"""
 
     def __init__(self, csv_file, root_dir, transform=None):
