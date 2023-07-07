@@ -53,7 +53,7 @@ class TripletAntsDataset(Dataset):
 
         positive_dir=  os.path.join(self.root_dir,               # Directory to all ant folders
                                 self.labels.iloc[idx, 0])       # Directory to specific ant folder
-        negattive_dir = positive_dir
+        negative_dir = positive_dir
         while negative_dir == positive_dir:
             negative_dir = random.choice(os.listdir(self.root_dir))
             neg_img_name = random.choice(os.listdir(os.path.join(self.root_dir, negative_dir)))
