@@ -47,7 +47,7 @@ class TripletAntsDataset(Dataset):
 
         positive_image = io.imread(positive_path)
 
-        positive_dir = = os.path.join(self.root_dir,               # Directory to all ant folders
+        positive_dir=  os.path.join(self.root_dir,               # Directory to all ant folders
                                 self.labels.iloc[idx, 0])       # Directory to specific ant folder
         negattive_dir = positive_dir
         while negative_dir == positive_dir:
