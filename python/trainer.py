@@ -32,6 +32,9 @@ class EarlyStopper:
 
 def train_one_epoch(model, data_loader, optimizer, criterion, device):
 
+    dataset_sizes = len(data_loader.dataset)
+
+
     model.train()  # Set model to training mode
 
     running_loss = 0.0
@@ -66,6 +69,7 @@ def train_one_epoch(model, data_loader, optimizer, criterion, device):
     return model, epoch_loss, epoch_acc
 
 def validate_one_epoch(model, data_loader, optimizer, criterion, device):
+    dataset_sizes = len(data_loader.dataset)
 
     model.eval()   # Set model to evaluate mode
 
