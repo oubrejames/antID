@@ -35,9 +35,6 @@ for label in labels:
     test_label_dir = os.path.join(test_dir, label)
     val_label_dir = os.path.join(val_dir, label)
     dst_label_dir = os.path.join(path_to_dataset, label)
-    os.makedirs(train_label_dir, exist_ok=True)
-    os.makedirs(test_label_dir, exist_ok=True)
-    os.makedirs(val_label_dir, exist_ok=True)
 
     image_files = os.listdir(label_dir)
     
