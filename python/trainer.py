@@ -94,7 +94,7 @@ def validate_one_epoch(model, data_loader, optimizer, criterion):
 
     return epoch_loss, epoch_acc
 
-def fit(model, dataloaders, criterion, optimizer, scheduler, num_epochs=50):
+def fit(model, dataloaders, criterion, optimizer, scheduler, device, num_epochs=50):
     # Start measuring time of training
     since = time.time()
 
