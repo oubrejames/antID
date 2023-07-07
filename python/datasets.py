@@ -13,6 +13,7 @@ from PIL import Image
 from tempfile import TemporaryDirectory
 from torch.utils.data import Dataset, DataLoader
 import pandas as pd
+from skimage import io, transform
 class TripletAntsDataset(Dataset):
     """"""
 
