@@ -116,7 +116,7 @@ def fit(model, dataloaders, criterion, optimizer, scheduler, device, num_epochs=
             model, train_loss, train_acc = train_one_epoch(model, dataloaders['train'], optimizer, criterion, device)
             scheduler.step() # Update learning rate
 
-            val_loss, val_acc = validate_one_epoch(model, dataloaders['val'], optimizer, device)
+            val_loss, val_acc = validate_one_epoch(model, dataloaders['val'], optimizer, criterion, device)
             print('Training Loss: {:.4f} Acc: {:.4f}'.format(train_loss, train_acc))
             print('Validation Loss: {:.4f} Acc: {:.4f}'.format(val_loss, val_acc))
 
