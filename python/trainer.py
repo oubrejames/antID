@@ -144,7 +144,7 @@ def train_one_epoch_triplet(model, data_loader, optimizer, criterion, device):
         anchor, positive, negative = anchor.to(device), positive.to(device), negative.to(device)
         
         optimizer.zero_grad()
-        anchor_output, positive_output, negative_output = model(anchor), model(positive), model(negative)
+        anchor_output, positive_output, negative_output = model(anchor positive,negative)
         loss = criterion(anchor_output, positive_output, negative_output)
         loss.backward()
         optimizer.step()
@@ -160,7 +160,7 @@ def validate_one_epoch_triplet(model, data_loader, optimizer, criterion, device)
         anchor, positive, negative = anchor.to(device), positive.to(device), negative.to(device)
         
         optimizer.zero_grad()
-        anchor_output, positive_output, negative_output = model(anchor), model(positive), model(negative)
+        anchor_output, positive_output, negative_output = model(anchor positive,negative)
         loss = criterion(anchor_output, positive_output, negative_output)
         
         running_loss += loss.item()
