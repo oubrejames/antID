@@ -61,7 +61,7 @@ class TripletAntsDataset(Dataset):
             neg_img_name = random.choice(os.listdir(os.path.join(self.root_dir, negative_dir)))
             negative_path = os.path.join(self.root_dir, negative_dir, neg_img_name)
 
-        negative_image = io.imread(negative_path)
+        negative_image = io.imread(positive_path)
 
         # sample = {'anchor': anchor_image,
         #           'positive': positive_image,
