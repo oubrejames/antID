@@ -32,7 +32,7 @@ class EarlyStopper:
 
 def train_one_epoch(model, data_loader, optimizer, criterion, device):
 
-    dataset_sizes = len(data_loader.dataset)
+    dataset_size = len(data_loader.dataset)
 
 
     model.train()  # Set model to training mode
