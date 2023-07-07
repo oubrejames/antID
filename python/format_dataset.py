@@ -6,6 +6,7 @@ import csv
 
 path_to_labeled_images = "../labeled_images"
 path_to_dataset = "../ant_face_data"
+os.makedirs(path_to_dataset, exist_ok=True)
 
 train_dir = os.path.join(path_to_dataset, 'train')
 test_dir = os.path.join(path_to_dataset, 'test')
