@@ -77,4 +77,4 @@ class TripletAntsDataset(Dataset):
             positive_image = self.transform(positive_image)
             negative_image = self.transform(negative_image)
 
-        return anchor_image, positive_image, negative_image, self.labels.iloc[idx, 0]
+        return anchor_image, positive_image, negative_image, str(self.labels.iloc[idx, 0])
