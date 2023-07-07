@@ -46,7 +46,13 @@ data_transforms = {
 data_dir = '../ant_face_data'
 csv_file = '../ant_face_data/labels.csv'
 dataset = TripletAntsDataset(csv_file, data_dir)
-train_set, val_set, test_set = torch.utils.data.random_split(dataset, [int(len(dataset)*0.8), int(len(dataset)*0.1), int(len(dataset)*0.1)])
+
+train_size = int(0.8 * len(dataset))
+val_size = int(0.1 * len(dataset))
+test_size = len(dataset) - train_size - val_size
+
+train_set, val_set, test_set = torch.utils.data.random_split(dataset, [train_size, val_size, test_size])
+
 train_loader = torch.utils.data.DataLoader(train_set, batch_size=20, shuffle=True, num_workers=4)
 val_loader = torch.utils.data.DataLoader(val_set, batch_size=20, shuffle=True, num_workers=4)
 test_loader = torch.utils.data.DataLoader(test_set, batch_size=20, shuffle=True, num_workers=4)
