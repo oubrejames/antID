@@ -12,87 +12,57 @@ import os
 from PIL import Image
 from tempfile import TemporaryDirectory
 
-# Creating a CNN class
-class CNN(nn.Module):
-    #  Determine what layers and their order in CNN object 
-    def __init__(self, num_classes):
-        super(CNN, self).__init__()
-        self.conv_layer1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3)
-        self.conv_layer2 = nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3)
-        self.max_pool1 = nn.MaxPool2d(kernel_size = 2, stride = 2)
-        
-        self.conv_layer3 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3)
-        self.conv_layer4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3)
-        self.max_pool2 = nn.MaxPool2d(kernel_size = 2, stride = 2)
+class TripletAntsDataset(Dataset):
+    """"""
 
-        self.conv_layer5 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3)
-        self.conv_layer6 = nn.Conv2d(in_channels=128, out_channels=128, kernel_size=3)
-        self.max_pool3 = nn.MaxPool2d(kernel_size = 2, stride = 2)
+    def __init__(self, csv_file, root_dir, transform=None):
+        """
+        Arguments:
+            csv_file (string): Path to the csv file with annotations.
+            root_dir (string): Directory with all the images.
+            transform (callable, optional): Optional transform to be applied
+                on a sample.
+        """
+        self.labels = pd.read_csv(csv_file)
+        self.root_dir = root_dir
+        self.transform = transform
 
-        self.fc1 = nn.Linear(236672 , 128)
-        self.relu1 = nn.ReLU()
-        self.fc2 = nn.Linear(128, num_classes)
-        self.relu2 = nn.ReLU()
-        self.fc3 = nn.Linear(11, num_classes)
+    def __len__(self):
+        return len(self.labels)
 
-    # Progresses data across layers    
-    def forward(self, x):
-        out = self.conv_layer1(x)
-        out = self.conv_layer2(out)
-        out = self.max_pool1(out)
-        
-        out = self.conv_layer3(out)
-        out = self.conv_layer4(out)
-        out = self.max_pool2(out)
-        
-        out = self.conv_layer5(out)
-        out = self.conv_layer6(out)
-        out = self.max_pool3(out)
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
 
-        out = out.reshape(out.size(0), -1)
-        
-        out = self.fc1(out)
-        out = self.relu1(out)
-        out = self.fc2(out)
-        out = self.relu2(out)
-        out = self.fc3(out)
-        return out
+        anchor_path = os.path.join(self.root_dir,               # Directory to all ant folders
+                                self.labels.iloc[idx, 0],       # Directory to specific ant folder
+                                self.labels.iloc[idx, 1])       # Filename of anchor image
 
-# Creating a CNN class
-class SiameseNet(nn.Module):
-    #  Determine what layers and their order in CNN object 
-    def __init__(self):
-        super(SiameseNet, self).__init__()
-        self.conv_layer1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3)
-        self.conv_layer2 = nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3)
-        self.max_pool1 = nn.MaxPool2d(kernel_size = 2, stride = 2)
+        anchor_image = io.imread(anchor_path)
 
-        self.conv_layer3 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3)
-        self.conv_layer4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3)
-        self.max_pool2 = nn.MaxPool2d(kernel_size = 2, stride = 2)
+        positive_path = anchor_path
+        while positive_path == anchor_path:
+            pos_img_name = random.choice(os.listdir(os.path.join(self.root_dir, self.labels.iloc[idx, 0])))
+            positive_path = os.path.join(self.root_dir, self.labels.iloc[idx, 0], pos_img_name)
 
-        self.conv_layer5 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3)
-        self.conv_layer6 = nn.Conv2d(in_channels=128, out_channels=128, kernel_size=3)
-        self.max_pool3 = nn.MaxPool2d(kernel_size = 2, stride = 2)
+        positive_image = io.imread(positive_path)
 
-        self.fc1 = nn.Linear(236672 , 128)
+        positive_dir = = os.path.join(self.root_dir,               # Directory to all ant folders
+                                self.labels.iloc[idx, 0])       # Directory to specific ant folder
+        negattive_dir = positive_dir
+        while negative_dir == positive_dir:
+            negative_dir = random.choice(os.listdir(self.root_dir))
+            neg_img_name = random.choice(os.listdir(os.path.join(self.root_dir, negative_dir)))
+            negative_path = os.path.join(self.root_dir, negative_dir, neg_img_name)
 
-    # Progresses data across layers    
-    def forward(self, x):
-        out = self.conv_layer1(x)
-        out = self.conv_layer2(out)
-        out = self.max_pool1(out)
-        
-        out = self.conv_layer3(out)
-        out = self.conv_layer4(out)
-        out = self.max_pool2(out)
-        
-        out = self.conv_layer5(out)
-        out = self.conv_layer6(out)
-        out = self.max_pool3(out)
+        negative_image = io.imread(negative_path)
 
-        out = out.reshape(out.size(0), -1)
+        sample = {'anchor': anchor_image, 'positive': positive_image, 'negative': negative_image, 'label': self.labels.iloc[idx, 0]}
 
-        out = self.fc1(out)
+        if self.transform:
+            sample = {'anchor':  self.transform(anchor_image),
+                      'positive':  self.transform(positive_image),
+                      'negative':  self.transform(negative_image),
+                      'label': self.labels.iloc[idx, 0]}
 
-        return out
+        return sample
