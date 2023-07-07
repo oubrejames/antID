@@ -43,7 +43,7 @@ data_transforms = {
 }
 
 
-data_dir = '../'
+data_dir = '../ant_face_data'
 csv_file = '../ant_face_data/labels.csv'
 dataset = TripletAntsDataset(csv_file, data_dir)
 
