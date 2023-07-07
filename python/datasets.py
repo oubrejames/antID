@@ -65,7 +65,10 @@ class TripletAntsDataset(Dataset):
             negative_dir_path = os.path.join(self.root_dir, negative_dir)
             if os.path.isfile(negative_dir_path):
                 print('IS FILE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+                print("New negative dir: ", negative_dir)
+
                 continue
+
             neg_img_name = random.choice(os.listdir(negative_dir_path))
             negative_path = os.path.join(negative_dir_path, neg_img_name)
 
