@@ -51,6 +51,7 @@ for label in labels:
         # Save images to labeled dataset
         src_path = os.path.join(label_dir, image_file)
         dst_path = os.path.join(dst_label_dir, image_file)
+        os.makedirs(dst_path, exist_ok=True)
         shutil.copy(src_path, dst_path)
 
     # train_files, test_val_files = train_test_split(image_files, test_size=test_size, random_state=random_state)
