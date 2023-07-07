@@ -30,7 +30,7 @@ class EarlyStopper:
                 return True
         return False
 
-def train_one_epoch(model, data_loader, optimizer, criterion):
+def train_one_epoch(model, data_loader, optimizer, criterion, device):
 
     model.train()  # Set model to training mode
 
@@ -65,7 +65,7 @@ def train_one_epoch(model, data_loader, optimizer, criterion):
 
     return model, epoch_loss, epoch_acc
 
-def validate_one_epoch(model, data_loader, optimizer, criterion):
+def validate_one_epoch(model, data_loader, optimizer, criterion, device):
 
     model.eval()   # Set model to evaluate mode
 
@@ -109,10 +109,10 @@ def fit(model, dataloaders, criterion, optimizer, scheduler, device, num_epochs=
             print(f'Epoch {epoch}/{num_epochs - 1}')
             print('-' * 10)
 
-            model, train_loss, train_acc = train_one_epoch(model, dataloaders['train'], optimizer, criterion)
+            model, train_loss, train_acc = train_one_epoch(model, dataloaders['train'], optimizer, criterion, device)
             scheduler.step() # Update learning rate
 
-            val_loss, val_acc = validate_one_epoch(model, dataloaders['val'], optimizer)
+            val_loss, val_acc = validate_one_epoch(model, dataloaders['val'], optimizer, device)
             print('Training Loss: {:.4f} Acc: {:.4f}'.format(train_loss, train_acc))
             print('Validation Loss: {:.4f} Acc: {:.4f}'.format(val_loss, val_acc))
 
