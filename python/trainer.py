@@ -198,9 +198,9 @@ def fit_triplet(model, dataloaders, criterion, optimizer, scheduler, device, num
                 best_acc = val_loss
                 torch.save(model.state_dict(), best_model_params_path)
 
-            if early_stopper.early_stop(val_loss):
-                print("Stopping early. Validation loss did not improve for {} epochs.".format(early_stopper.patience))
-                break
+            # if early_stopper.early_stop(val_loss):
+            #     print("Stopping early. Validation loss did not improve for {} epochs.".format(early_stopper.patience))
+            #     break
 
         time_elapsed = time.time() - since
         print(f'Training complete in {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s')
