@@ -1,5 +1,4 @@
 from trainer import fit
-from datasets import CNN
 import torch
 import torch.nn as nn
 import torch.optim as optim
