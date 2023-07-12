@@ -31,9 +31,6 @@ with open(os.path.join(path_to_dataset, "labels.csv"), "a") as f:
 labels = os.listdir(path_to_labeled_images)
 for label in labels:
     label_dir = os.path.join(path_to_labeled_images, label)
-    train_label_dir = os.path.join(train_dir, label)
-    test_label_dir = os.path.join(test_dir, label)
-    val_label_dir = os.path.join(val_dir, label)
     dst_label_dir = os.path.join(path_to_dataset, label)
 
     image_files = os.listdir(label_dir)

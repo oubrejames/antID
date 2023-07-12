@@ -1,5 +1,5 @@
 from trainer import fit
-from datasets import CNN
+from networks import CNN
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -63,8 +63,7 @@ criterion = nn.CrossEntropyLoss()
 optimizer_ft = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
 
-model_ft = fit(model, dataloaders, criterion, optimizer_ft, exp_lr_scheduler, device,
-                       num_epochs=50)
+model_ft = fit(model, dataloaders, criterion, optimizer_ft, exp_lr_scheduler, device, num_epochs=50)
 
 
 
