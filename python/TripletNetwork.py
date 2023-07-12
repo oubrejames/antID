@@ -53,15 +53,22 @@ test_size = len(dataset) - train_size - val_size
 
 train_set, val_set, test_set = torch.utils.data.random_split(dataset, [train_size, val_size, test_size])
 
-train_loader = torch.utils.data.DataLoader(train_set, batch_size=20, shuffle=True, num_workers=4)
-val_loader = torch.utils.data.DataLoader(val_set, batch_size=20, shuffle=True, num_workers=4)
-test_loader = torch.utils.data.DataLoader(test_set, batch_size=20, shuffle=True, num_workers=4)
+train_loader = torch.utils.data.DataLoader(train_set, batch_size=100, shuffle=True, num_workers=4)
+val_loader = torch.utils.data.DataLoader(val_set, batch_size=100, shuffle=True, num_workers=4)
+test_loader = torch.utils.data.DataLoader(test_set, batch_size=100, shuffle=True, num_workers=4)
 dataloaders = {'train': train_loader, 'val': val_loader, 'test': test_loader}
 
 model = TripletNet(EmbeddingNet())
 criteria = nn.TripletMarginLoss(margin=1.0, p=2)
-optimizer = optim.Adam(model.parameters(), lr=0.001)
+optimizer = optim.Adam(model.parameters(), lr=0.01)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 scheduler = lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
-fit_triplet(model, dataloaders, criteria, optimizer, scheduler, device, num_epochs=50)
+final_model, final_loss = fit_triplet(model, dataloaders, criteria, optimizer, scheduler, device, num_epochs=100)
 
+loss_round = round(final_loss)
+# Create final model name
+final_model_path = "../models/best_loss" + str(loss_round) + ".pt"
+
+# Save model
+os.makedirs("../models", exist_ok=True)
+torch.save(final_model.state_dict(), final_model_path)

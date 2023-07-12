@@ -11,6 +11,7 @@ import time
 import os
 from PIL import Image
 from tempfile import TemporaryDirectory
+import csv
 
 # From https://stackoverflow.com/questions/71998978/early-stopping-in-pytorch
 class EarlyStopper:
@@ -107,7 +108,7 @@ def fit(model, dataloaders, criterion, optimizer, scheduler, device, num_epochs=
         best_model_params_path = os.path.join(tempdir, 'best_model_params.pt')
 
         torch.save(model.state_dict(), best_model_params_path)
-        best_acc = 0.0
+        best_loss = 0.0
         early_stopper = EarlyStopper(patience=15, min_delta=0.001)
         for epoch in range(num_epochs):
             print(f'Epoch {epoch}/{num_epochs - 1}')
@@ -120,9 +121,8 @@ def fit(model, dataloaders, criterion, optimizer, scheduler, device, num_epochs=
             print('Training Loss: {:.4f} Acc: {:.4f}'.format(train_loss, train_acc))
             print('Validation Loss: {:.4f} Acc: {:.4f}'.format(val_loss, val_acc))
 
-                # deep copy the model
-            if val_acc > best_acc:
-                best_acc = val_acc
+            if val_acc > best_loss:
+                best_loss = val_acc
                 torch.save(model.state_dict(), best_model_params_path)
 
             if early_stopper.early_stop(val_loss):
@@ -131,7 +131,7 @@ def fit(model, dataloaders, criterion, optimizer, scheduler, device, num_epochs=
 
         time_elapsed = time.time() - since
         print(f'Training complete in {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s')
-        print(f'Best val Acc: {best_acc:4f}')
+        print(f'Best val Acc: {best_loss:4f}')
 
         # load best model weights
         model.load_state_dict(torch.load(best_model_params_path))
@@ -171,12 +171,17 @@ def fit_triplet(model, dataloaders, criterion, optimizer, scheduler, device, num
     # Start measuring time of training
     since = time.time()
 
+    # Save loss as a csv
+    with open(os.path.join("../", "loss.csv"), "w") as f:
+        writer = csv.writer(f)
+        writer.writerow(['val_loss', 'train_loss'])
+
     # Create a temporary directory to save training checkpoints
     with TemporaryDirectory() as tempdir:
         best_model_params_path = os.path.join(tempdir, 'best_model_params.pt')
         model = model.to(device)
         torch.save(model.state_dict(), best_model_params_path)
-        best_acc = 0.0
+        best_loss = 9999.0
         
         
         # early_stopper = EarlyStopper(patience=15, min_delta=0.001)
@@ -184,18 +189,24 @@ def fit_triplet(model, dataloaders, criterion, optimizer, scheduler, device, num
             print(f'Epoch {epoch}/{num_epochs - 1}')
             print('-' * 10)
 
-            model.train(True)
+            model.train()
             train_loss = train_one_epoch_triplet(model, dataloaders['train'], optimizer, criterion, device)
             scheduler.step() # Update learning rate
 
-            model.train(False)
+            model.eval()
             val_loss = validate_one_epoch_triplet(model, dataloaders['val'], optimizer, criterion, device)
-            print('Training Loss: {:.4f}'.format(train_loss))
-            print('Validation Loss: {:.4f}'.format(val_loss))
+            print('Training Loss (1000x): {:.4f}'.format(train_loss*1000))
+            print('Validation Loss (1000X): {:.4f}'.format(val_loss*1000))
+            print('\n')
 
-                # deep copy the model
-            if val_loss > best_acc:
-                best_acc = val_loss
+            # Save loss as a csv
+            with open(os.path.join("../", "loss.csv"), "a") as f:
+                writer = csv.writer(f)
+                writer.writerow([val_loss, train_loss])
+
+            # deep copy the model
+            if val_loss < best_loss:
+                best_loss = val_loss
                 torch.save(model.state_dict(), best_model_params_path)
 
             # if early_stopper.early_stop(val_loss):
@@ -204,8 +215,8 @@ def fit_triplet(model, dataloaders, criterion, optimizer, scheduler, device, num
 
         time_elapsed = time.time() - since
         print(f'Training complete in {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s')
-        # print(f'Best val Acc: {best_acc:4f}')
+        # print(f'Best val Acc: {best_loss:4f}')
 
         # load best model weights
         model.load_state_dict(torch.load(best_model_params_path))
-    return model
+    return model, best_loss
