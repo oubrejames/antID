@@ -8,3 +8,9 @@ labeled_images/
 labeled_vids/
 temp_vids/
 python/YOLO_V8/ant-face-detect.v1-ant_head_v1.yolov8/
+ant_face_data/
+python/YOLO_V8/datasets/
+python/YOLO_V8/runs/
+python/YOLO_V8/yolov8s.pt
+python/__pycache__/
+triplet_dataset/
