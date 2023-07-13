@@ -15,6 +15,7 @@ from tempfile import TemporaryDirectory
 from datasets import TripletAntsDataset
 from networks import TripletNet, EmbeddingNet
 from trainer import fit_triplet
+from testing import test_model
 
 cudnn.benchmark = True
 
@@ -63,12 +64,15 @@ criteria = nn.TripletMarginLoss(margin=1.0, p=2)
 optimizer = optim.Adam(model.parameters(), lr=0.01)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 scheduler = lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
-final_model, final_loss = fit_triplet(model, dataloaders, criteria, optimizer, scheduler, device, num_epochs=100)
+# final_model, final_loss = fit_triplet(model, dataloaders, criteria, optimizer, scheduler, device, num_epochs=100)
 
-loss_round = round(final_loss)
-# Create final model name
-final_model_path = "../models/best_loss" + str(loss_round) + ".pt"
+# loss_round = round(final_loss)
+# # Create final model name
+# final_model_path = "../models/best_loss" + str(loss_round) + ".pt"
 
-# Save model
-os.makedirs("../models", exist_ok=True)
-torch.save(final_model.state_dict(), final_model_path)
+# # Save model
+# os.makedirs("../models", exist_ok=True)
+# torch.save(final_model.state_dict(), final_model_path)
+
+model = torch.load('../bestloss0.pt')
+test_model(model, dataloaders['test'], device)
