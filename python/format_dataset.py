@@ -4,21 +4,24 @@ import shutil
 from sklearn.model_selection import train_test_split
 import csv
 
-path_to_labeled_images = "../labeled_images"
-path_to_dataset = "../ant_face_data"
+# path_to_labeled_images = "../labeled_images"
+# path_to_dataset = "../ant_face_data"
+path_to_dataset = "../unseen_data"
+path_to_labeled_images = "../unseen_images"
+
 os.makedirs(path_to_dataset, exist_ok=True)
 
-train_dir = os.path.join(path_to_dataset, 'train')
+# train_dir = os.path.join(path_to_dataset, 'train')
 test_dir = os.path.join(path_to_dataset, 'test')
-val_dir = os.path.join(path_to_dataset, 'val')
+# val_dir = os.path.join(path_to_dataset, 'val')
 test_size = 0.2  # Test set size
-val_size = 0.25  # Validation set size (25% of the remaining data after the test split)
+# val_size = 0.25  # Validation set size (25% of the remaining data after the test split)
 random_state = 42
 
 # Create the train, test, and validation directories
-os.makedirs(train_dir, exist_ok=True)
+# os.makedirs(train_dir, exist_ok=True)
 os.makedirs(test_dir, exist_ok=True)
-os.makedirs(val_dir, exist_ok=True)
+# os.makedirs(val_dir, exist_ok=True)
 
 # Create csv file with image paths and labels
 head = ['label', 'img_path']

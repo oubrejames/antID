@@ -44,20 +44,24 @@ data_transforms = {
 }
 
 
-data_dir = '../ant_face_data'
-csv_file = '../ant_face_data/labels.csv'
+# data_dir = '../ant_face_data'
+# csv_file = '../ant_face_data/labels.csv'
+data_dir = '../unseen_data'
+csv_file = '../unseen_data/labels.csv'
 dataset = TripletAntsDataset(csv_file, data_dir, transform=data_transforms['val'])
 
 train_size = int(0.8 * len(dataset))
 val_size = int(0.1 * len(dataset))
 test_size = len(dataset) - train_size - val_size
 
-train_set, val_set, test_set = torch.utils.data.random_split(dataset, [train_size, val_size, test_size])
+# train_set, val_set, test_set = torch.utils.data.random_split(dataset, [train_size, val_size, test_size])
 
-train_loader = torch.utils.data.DataLoader(train_set, batch_size=100, shuffle=True, num_workers=4)
-val_loader = torch.utils.data.DataLoader(val_set, batch_size=100, shuffle=True, num_workers=4)
-test_loader = torch.utils.data.DataLoader(test_set, batch_size=100, shuffle=True, num_workers=4)
-dataloaders = {'train': train_loader, 'val': val_loader, 'test': test_loader}
+# train_loader = torch.utils.data.DataLoader(train_set, batch_size=100, shuffle=True, num_workers=4)
+# val_loader = torch.utils.data.DataLoader(val_set, batch_size=100, shuffle=True, num_workers=4)
+# test_loader = torch.utils.data.DataLoader(test_set, batch_size=100, shuffle=True, num_workers=4)
+test_loader = torch.utils.data.DataLoader(dataset, batch_size=100, shuffle=True, num_workers=4)
+
+# dataloaders = {'train': train_loader, 'val': val_loader, 'test': test_loader}
 
 model = TripletNet(EmbeddingNet())
 criteria = nn.TripletMarginLoss(margin=1.0, p=2)
@@ -74,5 +78,8 @@ scheduler = lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
 # os.makedirs("../models", exist_ok=True)
 # torch.save(final_model.state_dict(), final_model_path)
 
-model = torch.load('../bestloss0.pt')
-test_model(model, dataloaders['test'], device)
+
+model.load_state_dict(torch.load('../models/best_loss0.pt'))
+model.eval()
+
+test_model(model, test_loader, device)

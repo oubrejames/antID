@@ -15,21 +15,59 @@ import csv
 
 def test_model(model, test_loader, device):
     model = model.to(device)
-    for anchor, positive, negative, label in test_loader:
-        # anchor, positive, negative = anchor.to(device), positive.to(device), negative.to(device)
-        anchor_output, positive_output, negative_output = model(anchor, positive, negative)
-        
-        # Get L2 norm of each output
-        anchor_norm = np.linalg.norm(anchor_output)
-        positive_norm = np.linalg.norm(positive_output)
-        negative_norm = np.linalg.norm(negative_output)
-        
-        # Calculate the squared L2 distance between each output
-        anchor_positive_dist = np.linalg.norm(anchor_output - positive_output)**2
-        anchor_negative_dist = np.linalg.norm(anchor_output - negative_output)**2
-        
-        print("Positive distance: ", anchor_positive_dist)
-        print("Negative distance: ", anchor_negative_dist)
+    true_positive_count = 0
+    true_negative_count = 0
+    false_positive_count = 0
+    false_negative_count = 0
+    total_count = 0
+    tested_count = 0
+
+    while tested_count < len(test_loader):
+        for anchor, positive, negative, label in test_loader:
+            anchor, positive, negative = anchor.to(device), positive.to(device), negative.to(device)
+            anchor_output, positive_output, negative_output = model(anchor, positive, negative)
+
+            # Calculate the squared L2 distance between each output
+            anchor_positive_dist = torch.norm(anchor_output - positive_output)**2
+            anchor_negative_dist = torch.norm(anchor_output - negative_output)**2
+            # print("Pos dist: ", anchor_positive_dist)
+            # print("Neg dist: ", anchor_negative_dist)
+            # Predict if positive and anchor are the same
+            if anchor_positive_dist < 500:
+                # Anchor and positve are predicted the same
+                true_positive_count += 1
+            else:
+                false_negative_count += 1
+
+            if anchor_negative_dist > 500:
+                true_negative_count += 1
+            else:
+                false_positive_count += 1
+
+            total_count += 1
+            # True positive rate
+        tp_rate = 100*true_positive_count/total_count
+        tn_rate = 100*true_negative_count/total_count
+        fp_rate = 100*false_positive_count/total_count
+        fn_rate = 100*false_negative_count/total_count
+        print("TP Rate after ", tested_count, "epochs: ", tp_rate)
+        print("TN Rate after ", tested_count, "epochs: ", tn_rate)
+        print("FP Rate after ", tested_count, "epochs: ", fp_rate)
+        print("FN Rate after ", tested_count, "epochs: ", fn_rate)
+        print("------------------------------------------------------------------- \n")
+        tested_count += 1
+
+    # True positive rate
+    tp_rate = 100*true_positive_count/total_count
+    tn_rate = 100*true_negative_count/total_count
+    fp_rate = 100*false_positive_count/total_count
+    fn_rate = 100*false_negative_count/total_count
+    print("TP Rate Final: ", tp_rate)
+    print("TN Rate Final: ", tn_rate)
+    print("FP Rate Final: ", fp_rate)
+    print("FN Rate Final: ", fn_rate)
+    print("Total number of testing images: ", total_count)
+    
 
     return None
 
