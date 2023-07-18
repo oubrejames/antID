@@ -5,7 +5,7 @@ import os
 from ultralytics import YOLO
 
 
-model= YOLO("YOLO_V8/runs/detect/yolov8s_v8_25e5/weights/best.pt")
+model= YOLO("YOLO_V8/runs/detect/yolov8s_v8_25e6/weights/best.pt")
 
 def get_head_box(im):
     # detections = model.predict(im, confidence=60, overlap=30).json()
@@ -30,14 +30,17 @@ def main():
     img_cnt = 0
     
     # Loop through all videos in labeled_videos
-    videos_directory = "../labeled_vids"
+    # videos_directory = "../labeled_vids"
+    videos_directory = "../unseen_vids"
+
     print("Processing videos in " + videos_directory)
     for ant_video in os.listdir(videos_directory):
         path_to_video = os.path.join(videos_directory, ant_video)
 
         # Create path to save images
         ant_id = path_to_video.split("/")[-1].split(".")[0]
-        path_to_imgs = "../labeled_images/" + ant_id
+        # path_to_imgs = "../labeled_images/" + ant_id
+        path_to_imgs = "../unseen_images/" + ant_id
 
         # Check if directory already exists
         if os.path.exists(path_to_imgs):
