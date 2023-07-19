@@ -67,7 +67,7 @@ dataloaders = {'train': train_loader, 'val': val_loader, 'test': test_loader}
 model = TripletNet(EmbeddingNet())
 criteria = nn.TripletMarginLoss(margin=0.7, p=2)
 optimizer = optim.Adam(model.parameters(), lr=0.01)
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 # model = nn.DataParallel(model, device_ids=[0, 1]) # Use both GPUs
 # model = DistributedDataParallel(model, device_ids=[[0, 1]])
 scheduler = lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
