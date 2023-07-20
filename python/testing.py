@@ -30,6 +30,10 @@ def test_model(model, test_loader, device, threshold):
         for anchor, positive, negative, label in test_loader:
             anchor, positive, negative = anchor.to(device), positive.to(device), negative.to(device)
             anchor_output, positive_output, negative_output = model(anchor, positive, negative)
+            print("ANCHOR OUTPUT SIZE: ", anchor_output.shape)
+            print('0', anchor_output[0][0])
+            print('1', anchor_output[0][1])
+            print('2', anchor_output[0][2])
 
             # Calculate the squared L2 distance between each output
             anchor_positive_dist = torch.norm(anchor_output - positive_output)**2
@@ -97,7 +101,7 @@ def test_thresholds(model, test_loader, device, path_to_folder):
     total_count = 0
     tested_count = 0
     epoch_count = 0
-    threshold = 300
+    threshold = 350
     thresh_vals = []
     tp_vals = []
     tn_vals = []
@@ -112,7 +116,6 @@ def test_thresholds(model, test_loader, device, path_to_folder):
         for anchor, positive, negative, label in test_loader:
             anchor, positive, negative = anchor.to(device), positive.to(device), negative.to(device)
             anchor_output, positive_output, negative_output = model(anchor, positive, negative)
-
             # Calculate the squared L2 distance between each output
             anchor_positive_dist = torch.norm(anchor_output - positive_output)**2
             anchor_negative_dist = torch.norm(anchor_output - negative_output)**2
@@ -151,7 +154,7 @@ def test_thresholds(model, test_loader, device, path_to_folder):
         true_negative_count = 0
         false_negative_count = 0
         false_positive_count = 0
-        threshold += 5
+        threshold += 10
         print("TP Rate at threshold = ", threshold, ": ", tp_rate)
         print("TN Rate at threshold = ", threshold, ": ", tn_rate)
         print("FP Rate at threshold = ", threshold, ": ", fp_rate)
