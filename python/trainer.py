@@ -149,9 +149,9 @@ def train_one_epoch_triplet(model, data_loader, optimizer, criterion, device):
         loss.backward()
         optimizer.step()
         
-        running_loss += loss.item()
+        running_loss += float(loss.item())
     
-    return loss.item() / len(data_loader.dataset)
+    return float(loss.item()) / len(data_loader.dataset)
 
 def validate_one_epoch_triplet(model, data_loader, optimizer, criterion, device):
     running_loss = 0.0
@@ -163,9 +163,9 @@ def validate_one_epoch_triplet(model, data_loader, optimizer, criterion, device)
         anchor_output, positive_output, negative_output = model(anchor, positive, negative)
         loss = criterion(anchor_output, positive_output, negative_output)
         
-        running_loss += loss.item()
+        running_loss += float(loss.item())
     
-    return loss.item() / len(data_loader.dataset)
+    return float(loss.item()) / len(data_loader.dataset)
 
 def fit_triplet(model, dataloaders, criterion, optimizer, scheduler, device, num_epochs=50):
     # Start measuring time of training
