@@ -13,7 +13,7 @@ from trainer import fit_triplet
 from testing import test_model
 import shutil
 from plot_loss import plot_loss
-from trainer import early_stopper
+from trainer import EarlyStopper
 
 """
 This script trains a triplet network on the ant face dataset.
@@ -30,7 +30,7 @@ gpu_parallel = False
 scheduler_step_size = 7
 scheduler_gamma = 0.1
 num_epochs = 200
-early_stopper = early_stopper(patience=15, min_delta=0.001)
+early_stopper = EarlyStopper(patience=15, min_delta=0.001)
 ##############################
 
 
