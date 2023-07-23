@@ -13,7 +13,7 @@ import os
 from PIL import Image
 from tempfile import TemporaryDirectory
 from datasets import TripletAntsDataset
-from networks import TripletNet, EmbeddingNet
+from networks import TripletNet, EmbeddingNet, FaceNet
 from trainer import fit_triplet
 from testing import test_model
 import shutil
@@ -64,8 +64,8 @@ test_loader = torch.utils.data.DataLoader(test_set, batch_size=100, shuffle=True
 
 dataloaders = {'train': train_loader, 'val': val_loader, 'test': test_loader}
 
-model = TripletNet(EmbeddingNet())
-criteria = nn.TripletMarginLoss(margin=0.7, p=2)
+model = TripletNet(FaceNet())
+criteria = nn.TripletMarginLoss(margin=0.5, p=2)
 optimizer = optim.Adam(model.parameters(), lr=0.01)
 device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 # model = nn.DataParallel(model, device_ids=[0, 1]) # Use both GPUs
@@ -77,7 +77,7 @@ final_model, final_loss = fit_triplet(model, dataloaders, criteria, optimizer, s
 existing_models = os.listdir("../models")
 latest_model_seq = 0
 for existing_model in existing_models:
-    tmp_id = existing_model.split(".")[0][-1]
+    tmp_id = existing_model.split("_")[-1]
     print("TMP ID: ", tmp_id)
     if int(tmp_id) >= latest_model_seq:
         latest_model_seq = int(tmp_id) + 1
