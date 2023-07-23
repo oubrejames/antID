@@ -2,7 +2,25 @@ import torch
 import matplotlib.pyplot as plt
 
 def test_model(model, test_loader, device, threshold):
+    """
+    Loops through all images in the test_loader and calculates the true positive rate, true negative
+    rate, false positive rate, false negative rate, and accuracy.
+    
+
+    Args:
+        model (nn.Module): ant face recognition model
+        test_loader (torch.utils.data.DataLoader): train dataloader
+        device (torch.device): GPU or CPU
+        threshold (float): threshold to determine if two images are the same
+
+    Returns:
+        None
+    """
+
+    # Load model to device
     model = model.to(device)
+
+    # Initialize counts for metrics
     true_positives_count = 0
     true_negatives_count = 0
     false_positives_count = 0
@@ -10,53 +28,70 @@ def test_model(model, test_loader, device, threshold):
     total_img_count = 0
     tested_count = 0
 
+    # Variables to calculate average distance
     total_neg_dist= 0
     total_pos_dist = 0
-    image_epoch_count = 0
+    num_imgs_per_epoch = 0
 
-    while tested_count < len(test_loader):
-        for anchors, positives, negatives, labels in test_loader:
-            anchors, positives, negatives = anchors.to(device), positives.to(device), negatives.to(device)
-            anchors_output, positives_output, negatives_output = model(anchors, positives, negatives)
-            # print("ANCHORS SHAPE: ", anchors.shape) === 100, 3, 375, 375
-            # print("TEST LOADER LEN: ", len(test_loader)) === 28
-            # Loop through all individual embeddings
-            for i, anchor in enumerate(anchors_output):
-                # Calculate the squared L2 distance between each output
-                anchors_positives_dist = torch.linalg.vector_norm(anchors_output[i] - positives_output[i])**2
-                anchors_negatives_dist = torch.linalg.vector_norm(anchors_output[i] - negatives_output[i])**2
+    # Loop through all images in test_loader
+    for anchors, positives, negatives, labels in test_loader:
+        anchors, positives, negatives = anchors.to(device), positives.to(device), negatives.to(device)
+        anchors_output, positives_output, negatives_output = model(anchors, positives, negatives)
 
-                total_neg_dist += float(anchors_negatives_dist)
-                total_pos_dist += float(anchors_positives_dist)
+        # Loop through all individual embeddings
+        for i, anchor in enumerate(anchors_output):
+            # Calculate the squared L2 distance between each output
+            anchors_positives_dist = torch.linalg.vector_norm(anchors_output[i] - positives_output[i])**2
+            anchors_negatives_dist = torch.linalg.vector_norm(anchors_output[i] - negatives_output[i])**2
 
-                # Predict if positives and anchors are the same
-                if anchors_positives_dist < threshold:
-                    # anchors and positve are predicted the same
-                    true_positives_count += 1
-                else:
-                    false_negatives_count += 1
+            # Update total distances for average
+            total_neg_dist += float(anchors_negatives_dist)
+            total_pos_dist += float(anchors_positives_dist)
 
-                if anchors_negatives_dist > threshold:
-                    true_negatives_count += 1
-                else:
-                    false_positives_count += 1
+            # Predict if positives and anchors are the same
+            if anchors_positives_dist < threshold:
+                # Anchors and positve are predicted the same
+                true_positives_count += 1
+            else:
+                # Anchors and positive are predicted different
+                false_negatives_count += 1
 
-                total_img_count += 1
-                image_epoch_count += 1
+            if anchors_negatives_dist > threshold:
+                # Anchors and negative are predicted different
+                true_negatives_count += 1
+            else:
+                # Anchors and negative are predicted the same
+                false_positives_count += 1
+
+            total_img_count += 1
+            num_imgs_per_epoch += 1
         
-        print("Avg pos dist for epoch: ", total_pos_dist/image_epoch_count)
-        print("Avg neg dist for epoch: ", total_neg_dist/image_epoch_count)
+        print("Avg pos dist for epoch: ", total_pos_dist/num_imgs_per_epoch)
+        print("Avg neg dist for epoch: ", total_neg_dist/num_imgs_per_epoch)
+
+        # Reset counts for next epoch
         total_neg_dist= 0
         total_pos_dist = 0
-        image_epoch_count = 0
+        num_imgs_per_epoch = 0
 
-        # True positives rate
-        tp_rate = 100*true_positives_count/(true_positives_count+false_positives_count)
-        tn_rate = 100*true_negatives_count/(true_negatives_count+false_negatives_count)
-        fp_rate = 100*false_positives_count/(true_positives_count+false_positives_count)
-        fn_rate = 100*false_negatives_count/(true_negatives_count+false_negatives_count)
+        # Caclulate metrics for each epoch tested
+        if true_positives_count+false_positives_count:
+            tp_rate = 100*true_positives_count/(true_positives_count+false_positives_count)
+            fp_rate = 100*false_positives_count/(true_positives_count+false_positives_count)
+        else:
+            tp_rate = 0
+            fp_rate = 0
+
+        if true_negatives_count+false_negatives_count:
+            tn_rate = 100*true_negatives_count/(true_negatives_count+false_negatives_count)
+            fn_rate = 100*false_negatives_count/(true_negatives_count+false_negatives_count)
+        else:
+            tn_rate = 0
+            fn_rate = 0
+
         accuracy = 100*(true_negatives_count+true_positives_count)/(true_negatives_count+\
-            true_positives_count+false_negatives_count+false_positives_count)
+                    true_positives_count+false_negatives_count+false_positives_count)
+
         print("TP Rate after ", tested_count, "epochs: ", tp_rate)
         print("TN Rate after ", tested_count, "epochs: ", tn_rate)
         print("FP Rate after ", tested_count, "epochs: ", fp_rate)
@@ -65,20 +100,13 @@ def test_model(model, test_loader, device, threshold):
         print("------------------------------------------------------------------- \n")
         tested_count += 1
 
-    # True positives rate
-    tp_rate = 100*true_positives_count/(true_positives_count+false_positives_count)
-    tn_rate = 100*true_negatives_count/(true_negatives_count+false_negatives_count)
-    fp_rate = 100*false_positives_count/(true_positives_count+false_positives_count)
-    fn_rate = 100*false_negatives_count/(true_negatives_count+false_negatives_count)
-    accuracy = 100*(true_negatives_count+true_positives_count)/(true_negatives_count+\
-        true_positives_count+false_negatives_count+false_positives_count)
+    # Print final metrics
     print("TP Rate Final: ", tp_rate)
     print("TN Rate Final: ", tn_rate)
     print("FP Rate Final: ", fp_rate)
     print("FN Rate Final: ", fn_rate)
     print("Final Accuracy: ", accuracy)
     print("Total number of testing images: ", total_img_count)
-    
 
     return None
 
