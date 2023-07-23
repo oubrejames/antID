@@ -30,8 +30,8 @@ def main():
     img_cnt = 0
     
     # Loop through all videos in labeled_videos
-    # videos_directory = "../labeled_vids"
-    videos_directory = "../unseen_vids"
+    videos_directory = "../labeled_vids"
+    # videos_directory = "../unseen_vids"
 
     print("Processing videos in " + videos_directory)
     for ant_video in os.listdir(videos_directory):
@@ -39,8 +39,8 @@ def main():
 
         # Create path to save images
         ant_id = path_to_video.split("/")[-1].split(".")[0]
-        # path_to_imgs = "../labeled_images/" + ant_id
-        path_to_imgs = "../unseen_images/" + ant_id
+        path_to_imgs = "../labeled_images/" + ant_id
+        # path_to_imgs = "../unseen_images/" + ant_id
 
         # Check if directory already exists
         if os.path.exists(path_to_imgs):
