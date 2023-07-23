@@ -1,4 +1,5 @@
 import torch.nn as nn 
+import torch
 # Creating a CNN class
 class CNN(nn.Module):
     #  Determine what layers and their order in CNN object 
@@ -19,8 +20,7 @@ class CNN(nn.Module):
         self.fc1 = nn.Linear(236672 , 128)
         self.relu1 = nn.ReLU()
         self.fc2 = nn.Linear(128, num_classes)
-        self.relu2 = nn.ReLU()
-        self.fc3 = nn.Linear(11, num_classes)
+
 
     # Progresses data across layers    
     def forward(self, x):
@@ -41,8 +41,6 @@ class CNN(nn.Module):
         out = self.fc1(out)
         out = self.relu1(out)
         out = self.fc2(out)
-        out = self.relu2(out)
-        out = self.fc3(out)
         return out
 
 # Creating a CNN class
@@ -89,16 +87,16 @@ class SiameseNet(nn.Module):
 class EmbeddingNet(nn.Module):
     def __init__(self):
         super(EmbeddingNet, self).__init__()
-        self.convnet = nn.Sequential(nn.Conv2d(3, 32, 5), nn.PReLU(),
+        self.convnet = nn.Sequential(nn.Conv2d(3, 32, 9), nn.PReLU(),
                                      nn.MaxPool2d(2, stride=2),
-                                     nn.Conv2d(32, 64, 5), nn.PReLU(),
+                                     nn.Conv2d(32, 64, 9), nn.PReLU(),
                                      nn.MaxPool2d(2, stride=2))
 
-        self.fc = nn.Sequential(nn.Linear(518400, 256),
+        self.fc = nn.Sequential(nn.Linear(484416 , 256), #518400
                                 nn.PReLU(),
                                 nn.Linear(256, 256),
                                 nn.PReLU(),
-                                nn.Linear(256, 2)
+                                nn.Linear(256, 128)
                                 )
 
     def forward(self, x):
@@ -123,3 +121,41 @@ class TripletNet(nn.Module):
 
     def get_embedding(self, x):
         return self.embedding_net(x)
+    
+class FaceNet(nn.Module):
+    def __init__(self):
+        super(FaceNet, self).__init__()
+        self.convnet = nn.Sequential(nn.Conv2d(3, 64, 7, stride = 2),
+                                     nn.MaxPool2d(3, stride=2),
+                                     nn.LocalResponseNorm(2),
+                                     nn.Conv2d(64, 64, 1), 
+                                     nn.Conv2d(64, 192, 1), 
+                                     nn.LocalResponseNorm(2),
+                                     nn.MaxPool2d(3, stride=2),
+                                     nn.Conv2d(192, 192, 1),
+                                     nn.Conv2d(192, 384, 3),
+                                     nn.MaxPool2d(3, stride=2),
+                                     nn.Conv2d(384, 384, 1),
+                                     nn.Conv2d(384, 256, 3),
+                                     nn.Conv2d(256, 256, 1),
+                                     nn.Conv2d(256, 256, 3),
+                                     nn.Conv2d(256, 256, 1),
+                                     nn.Conv2d(256, 256, 3),
+                                     nn.MaxPool2d(3, stride=2))
+
+        self.fc = nn.Sequential(nn.Linear(12544 , 128*32), #518400
+                                nn.PReLU(),
+                                nn.Linear(128*32, 128*32),
+                                nn.PReLU(),
+                                nn.Linear(128*32, 128)
+                                )
+
+    def forward(self, x):
+        output = self.convnet(x)
+        output = output.view(output.size()[0], -1)
+        output = self.fc(output)
+        # output = torch.linalg.vector_norm(output)
+        return output
+
+    def get_embedding(self, x):
+        return self.forward(x)
