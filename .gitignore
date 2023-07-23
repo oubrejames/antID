@@ -14,3 +14,12 @@ python/YOLO_V8/runs/
 python/YOLO_V8/yolov8s.pt
 python/__pycache__/
 triplet_dataset/
+loss.csv
+models/
+clustering.png
+loss.png
+loss_train.png
+loss_val.png
+unseen_data/
+unseen_images/
+unseen_vids/
