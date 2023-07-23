@@ -137,7 +137,7 @@ def validate_one_epoch(model, data_loader, optimizer, criterion, device):
 
     return epoch_loss, epoch_acc
 
-def fit(model, dataloaders, criterion, optimizer, scheduler, device, num_epochs=50):
+def fit(model, dataloaders, criterion, optimizer, scheduler, device, num_epochs=50, early_stopper=None):
     """Fit the model to the data for a given number of epochs (not used for triplet network).
 
     Args:
@@ -165,9 +165,6 @@ def fit(model, dataloaders, criterion, optimizer, scheduler, device, num_epochs=
         # Initialize best validation accuracy
         best_val_acc = 0.0
 
-        # Initialize early stopper
-        early_stopper = EarlyStopper(patience=15, min_delta=0.001)
-
         # Iterate over epochs
         for epoch in range(num_epochs):
             print(f'Epoch {epoch}/{num_epochs - 1}')
@@ -186,9 +183,14 @@ def fit(model, dataloaders, criterion, optimizer, scheduler, device, num_epochs=
                 torch.save(model.state_dict(), best_model_params_path)
 
             # Check if early stopper should stop training
-            if early_stopper.early_stop(val_loss):
-                print("Stopping early. Validation loss did not improve for {} epochs.".format(early_stopper.patience))
-                break
+            if early_stopper is not None:
+                if early_stopper.early_stop(val_loss):
+                    print("Stopping early. Validation loss did not improve for {} epochs.".format(early_stopper.patience))
+                    break
+
+                # Print early stopper count to see how its tracking
+                print("Early stopper count: ", early_stopper.counter)
+                print('\n')
 
         time_elapsed = time.time() - since
         print(f'Training complete in {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s')
@@ -272,7 +274,7 @@ def validate_one_epoch_triplet(model, data_loader, optimizer, criterion, device)
 
     return running_loss / len(data_loader.dataset)
 
-def fit_triplet(model, dataloaders, criterion, optimizer, scheduler, device, num_epochs=50):
+def fit_triplet(model, dataloaders, criterion, optimizer, scheduler, device, num_epochs=50, early_stopper=None):
     """Fit the model to the data for a given number of epochs (used for triplet network).
 
     Args:
@@ -306,9 +308,6 @@ def fit_triplet(model, dataloaders, criterion, optimizer, scheduler, device, num
         # Initialize best validation loss
         best_val_loss = 9999.0
 
-        # Initialize early stopper
-        early_stopper = EarlyStopper(patience=15, min_delta=0.001/1000)
-
         # Iterate over epochs
         for epoch in range(num_epochs):
             print(f'Epoch {epoch}/{num_epochs - 1}')
@@ -337,17 +336,17 @@ def fit_triplet(model, dataloaders, criterion, optimizer, scheduler, device, num
                 torch.save(model.state_dict(), best_model_params_path)
 
             # Check if early stopper should stop training
-            if early_stopper.early_stop(val_loss):
-                print("Stopping early. Validation loss did not improve for {} epochs.".format(early_stopper.patience))
-                break
+            if early_stopper is not None:
+                if early_stopper.early_stop(val_loss):
+                    print("Stopping early. Validation loss did not improve for {} epochs.".format(early_stopper.patience))
+                    break
 
-            # Print early stopper count to see how its tracking
-            print("Early stopper count: ", early_stopper.counter)
-            print('\n')
+                # Print early stopper count to see how its tracking
+                print("Early stopper count: ", early_stopper.counter)
+                print('\n')
 
         time_elapsed = time.time() - since
         print(f'Training complete in {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s')
-        # print(f'Best val Acc: {best_val_loss:4f}')
 
         # load best model weights
         model.load_state_dict(torch.load(best_model_params_path))

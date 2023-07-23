@@ -13,6 +13,7 @@ from trainer import fit_triplet
 from testing import test_model
 import shutil
 from plot_loss import plot_loss
+from trainer import early_stopper
 
 """
 This script trains a triplet network on the ant face dataset.
@@ -29,6 +30,7 @@ gpu_parallel = False
 scheduler_step_size = 7
 scheduler_gamma = 0.1
 num_epochs = 200
+early_stopper = early_stopper(patience=15, min_delta=0.001)
 ##############################
 
 
@@ -78,7 +80,7 @@ scheduler = lr_scheduler.StepLR(optimizer, step_size=scheduler_step_size, gamma=
 
 
 # Train model
-final_model, final_loss = fit_triplet(model, dataloaders, loss_func, optimizer, scheduler, device, num_epochs=num_epochs)
+final_model, final_loss = fit_triplet(model, dataloaders, loss_func, optimizer, scheduler, device, num_epochs=num_epochs, early_stopper=early_stopper)
 
 
 # Check other models in models directory to see what the next model number should be
