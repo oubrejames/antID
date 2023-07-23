@@ -10,7 +10,7 @@ import os
 from datasets import TripletAntsDataset
 from networks import TripletNet, EmbeddingNet, FaceNet
 from trainer import fit_triplet
-from testing import test_model
+from tester import test_model
 import shutil
 from plot_loss import plot_loss
 from trainer import EarlyStopper
