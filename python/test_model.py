@@ -13,7 +13,7 @@ import os
 from PIL import Image
 from tempfile import TemporaryDirectory
 from datasets import TripletAntsDataset
-from networks import TripletNet, EmbeddingNet
+from networks import TripletNet, EmbeddingNet, FaceNet
 from trainer import fit_triplet
 from testing import test_model, test_thresholds
 
@@ -42,19 +42,23 @@ data_dir = '../ant_face_data'
 csv_file = '../ant_face_data/labels.csv'
 full_dataset = TripletAntsDataset(csv_file, data_dir, transform=data_transforms['crop_norm'])
 train_size = int(0.8 * len(full_dataset))
-val_size = int(0.1 * len(full_dataset))
-test_size = len(full_dataset) - train_size - val_size
-train_set, val_set, test_set = torch.utils.data.random_split(full_dataset, [train_size, val_size, test_size])
-val_loader = torch.utils.data.DataLoader(val_set, batch_size=100, shuffle=True, num_workers=4)
+# val_size = int(0.1 * len(full_dataset))
+# test_size = len(full_dataset) - train_size - val_size
+# train_set, val_set, test_set = torch.utils.data.random_split(full_dataset, [train_size, val_size, test_size])
+# val_loader = torch.utils.data.DataLoader(val_set, batch_size=100, shuffle=True, num_workers=4)
 
+# With no testing
+val_size = len(full_dataset) - train_size
+train_set, val_set = torch.utils.data.random_split(full_dataset, [train_size, val_size])
+val_loader = torch.utils.data.DataLoader(val_set, batch_size=100, shuffle=True, num_workers=4)
 
 model = TripletNet(EmbeddingNet())
 device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 # model = nn.DataParallel(model, device_ids=[0, 1]) # Use both GPUs
 
-model.load_state_dict(torch.load('../models/triplet_net_3/best_model.pt'))
+model.load_state_dict(torch.load('../models/triplet_net_22/best_model.pt'))
 model.eval()
-latest_model_seq =3
+latest_model_seq =22
 
 
 # ##### Get thresh
@@ -71,8 +75,47 @@ latest_model_seq =3
 # Create final model name
 final_model_folder = "../models/triplet_net_" + str(latest_model_seq)
 
-# best_threshold, average_thresh = test_thresholds(model, test_loader, device, final_model_folder)
+average_thresh = test_thresholds(model, test_loader, device, final_model_folder)
 #220
-average_thresh = 200
-print("##### Average threshold : ", average_thresh)
-test_model(model, test_loader, device, average_thresh)
+# average_thresh = 25*(10**13)
+# print("##### Average threshold : ", average_thresh)
+test_model(model, test_loader, device, average_thresh   )
+
+######### Some notes
+"""
+Model 9: output 128 x1
+        margin 0.7
+        ACC: ~67
+
+Model 10: output 128 x1
+        margin 2
+        ACC: ~ 74
+    
+Model 13: output 256 x1
+        margin 0.7
+        ACC: ~66
+
+Model 12: output 256 x1
+        margin 2
+        ACC: ~68
+
+Model 14: output 256 x1
+        margin 4
+        ACC: ~75 - 77 ON THRESH TEST BUT ONLY 66 ON TEST
+
+Model 15: output 128 x1
+        margin 4
+        ACC: ~70
+
+Model 16: output 100 x1
+        margin 0.7
+        ACC: ~70
+
+Model 17: output 100 x1
+        margin 2
+        ACC: ~68
+
+Model try: output 128 x1
+        margin 2 p =4
+        ACC: ~
+"""

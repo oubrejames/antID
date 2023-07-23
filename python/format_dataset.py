@@ -4,10 +4,10 @@ import shutil
 from sklearn.model_selection import train_test_split
 import csv
 
-# path_to_labeled_images = "../labeled_images"
-# path_to_dataset = "../ant_face_data"
-path_to_dataset = "../unseen_data"
-path_to_labeled_images = "../unseen_images"
+path_to_labeled_images = "../labeled_images"
+path_to_dataset = "../ant_face_data"
+# path_to_dataset = "../unseen_data"
+# path_to_labeled_images = "../unseen_images"
 
 os.makedirs(path_to_dataset, exist_ok=True)
 
@@ -20,15 +20,15 @@ random_state = 42
 
 # Create the train, test, and validation directories
 # os.makedirs(train_dir, exist_ok=True)
-os.makedirs(test_dir, exist_ok=True)
+# os.makedirs(test_dir, exist_ok=True)
 # os.makedirs(val_dir, exist_ok=True)
 
 # Create csv file with image paths and labels
-head = ['label', 'img_path']
+# head = ['label', 'img_path']
 
-with open(os.path.join(path_to_dataset, "labels.csv"), "a") as f:
-    writer = csv.writer(f)
-    writer.writerow(head)
+# with open(os.path.join(path_to_dataset, "labels.csv"), "a") as f:
+#     writer = csv.writer(f)
+#     writer.writerow(head)
 
 # Split the dataset into train, test, and validation sets
 labels = os.listdir(path_to_labeled_images)

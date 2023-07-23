@@ -44,7 +44,7 @@ def train_one_epoch(model, data_loader, optimizer, criterion, device):
     # Iterate over data.
     for inputs, labels in data_loader:
         inputs = inputs.to(device)
-        labels = labels.to(device)
+        # labels = labels.to(device)
 
         # zero the parameter gradients
         optimizer.zero_grad()
@@ -195,9 +195,10 @@ def fit_triplet(model, dataloaders, criterion, optimizer, scheduler, device, num
 
             model.eval()
             val_loss = validate_one_epoch_triplet(model, dataloaders['val'], optimizer, criterion, device)
-            print('Training Loss (1000x): {:.4f}'.format(train_loss*1000))
-            print('Validation Loss (1000X): {:.4f}'.format(val_loss*1000))
-            print('\n')
+            # print('Training Loss (1000x): {:.4f}'.format(train_loss*1000))
+            # print('Validation Loss (1000X): {:.4f}'.format(val_loss*1000))
+            print('Training Loss: {:.4f}'.format(train_loss))
+            print('Validation Loss: {:.4f}'.format(val_loss))
 
             # Save loss as a csv
             with open(os.path.join("../", "loss.csv"), "a") as f:
@@ -212,6 +213,8 @@ def fit_triplet(model, dataloaders, criterion, optimizer, scheduler, device, num
             if early_stopper.early_stop(val_loss):
                 print("Stopping early. Validation loss did not improve for {} epochs.".format(early_stopper.patience))
                 break
+            print("Early stopper count: ", early_stopper.counter)
+            print('\n')
 
         time_elapsed = time.time() - since
         print(f'Training complete in {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s')
