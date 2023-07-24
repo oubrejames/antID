@@ -74,7 +74,7 @@ if gpu_parallel:
 
 # Load trained model and put into evaluation mode
 trained_model_path = '../models/triplet_net_' + str(model_number) + '/best_model.pt'
-model.load_state_dict(torch.load(trained_model_path))
+model.load_state_dict(torch.load(trained_model_path, map_location=device))
 model.eval()
 
 
