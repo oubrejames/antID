@@ -9,7 +9,7 @@ import random
 import numpy as np
 
 ######### PARAMETERS #########
-embedding_network = FaceNet()
+embedding_network = EmbeddingNet()
 batch_size = 100
 model_number = 22
 gpu_id = "cuda:1"
@@ -87,12 +87,14 @@ print("Best threshold : ", best_threshold)
 
 
 # Test model on seen test data
-print("Testing model on seen test data...")
+print("\n","*" * 50)
+print("\nTesting model on seen test data...\n")
 test_model(model, seen_test_loader, device, best_threshold)
 print("-" * 50, '\n')
 
 
 # Test model on unseen test data
-print("Testing model on unseen test data...")
+print("\n","*" * 50)
+print("\nTesting model on unseen test data...\n")
 test_model(model, unseen_test_loader, device, best_threshold)
 print("-" * 50, '\n')

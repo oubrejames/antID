@@ -169,8 +169,8 @@ def test_thresholds(model, test_loader, device, path_to_folder):
             # On first epoch, set threshold to a little less than average positive distance
             # Set threshold increment to be 5% of average positive distance
             if first_epoch:
-                threshold = 0.8*anchors_positives_dist
-                threshold_increment = 0.05*anchors_positives_dist
+                threshold = 0.8*float(anchors_positives_dist)
+                threshold_increment = 0.05*float(anchors_positives_dist)
 
             # Predict if positives and anchors are the same
             if anchors_positives_dist < threshold:
