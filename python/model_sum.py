@@ -2,6 +2,10 @@ from torchvision import models
 from torchsummary import summary
 from networks import TripletNet, EmbeddingNet
 
+"""
+Print out the model architecture for the a given model.
+"""
+
 print('Embedding net: \n ----------------------------')
 model_e = EmbeddingNet()
 summary(model_e, (3, 375, 375))

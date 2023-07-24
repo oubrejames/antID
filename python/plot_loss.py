@@ -2,6 +2,12 @@ import matplotlib.pyplot as plt
 import csv
 
 def plot_loss(path_to_folder):
+    """Loop through the loss.csv file and plot the loss for each epoch.
+
+    Args:
+        path_to_folder (string): path to the folder containing the loss.csv file
+    """
+
     val_loss = []
     train_loss = []
     epochs = []
@@ -30,5 +36,3 @@ def plot_loss(path_to_folder):
     plt.ylabel('Loss')
     plt.legend()
     plt.savefig(path_to_folder + '/loss_val.png')
-
-
