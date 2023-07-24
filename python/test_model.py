@@ -14,6 +14,7 @@ batch_size = 100
 model_number = 22
 gpu_id = "cuda:1"
 gpu_parallel = False
+test_thresh = True
 ##############################
 
 
@@ -82,8 +83,9 @@ final_model_folder = "../models/triplet_net_" + str(model_number)
 
 
 # Test model thresholds on validation data to find best threshold
-best_threshold = test_thresholds(model, seen_val_loader, device, final_model_folder)
-print("Best threshold : ", best_threshold)
+if test_thresh:
+    best_threshold, best_accuracy = test_thresholds(model, seen_val_loader, device, final_model_folder)
+    print("Best threshold : ", best_threshold, "Accuracy: ", best_accuracy)
 
 
 # Test model on seen test data

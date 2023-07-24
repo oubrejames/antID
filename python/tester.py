@@ -134,9 +134,10 @@ def test_thresholds(model, test_loader, device, path_to_folder):
     false_negatives_count = 0
     total_img_count = 1
     threshold_increment = 0
+    threshold = 1
 
     # Flag to indicate if first epoch
-    first_epoch = True
+    first_run = True
 
     # Create lists to save metrics and plot
     thresh_vals = []
@@ -146,110 +147,124 @@ def test_thresholds(model, test_loader, device, path_to_folder):
 
     # Variable to save best accuracy
     best_accuracy = 0
+    accuracy = 0
 
     # Variables to calculate average distance
     total_neg_dist = 0
     total_pos_dist = 0
 
-    # Loop through all images in test_loader
-    for anchors, positives, negatives, labels in test_loader:
-        anchors, positives, negatives = anchors.to(device), positives.to(device), negatives.to(device)
-        anchors_output, positives_output, negatives_output = model(anchors, positives, negatives)
+    # Loop through entire val set for each threshold
+    number_of_thresholds_to_try = 100
+    number_of_thresholds_tested = 0
+    data_count = 0
 
-        # Loop through all individual embeddings
-        for i, anchor in enumerate(anchors_output):
-            # Calculate the squared L2 distance between each output
-            anchors_positives_dist = torch.norm(anchors_output[i] - positives_output[i])**2
-            anchors_negatives_dist = torch.norm(anchors_output[i] - negatives_output[i])**2
+    while number_of_thresholds_tested <= number_of_thresholds_to_try:
+        # Loop through all images in test_loader
+        for anchors, positives, negatives, labels in test_loader: # Loads the batches
+            anchors, positives, negatives = anchors.to(device), positives.to(device), negatives.to(device)
+            anchors_output, positives_output, negatives_output = model(anchors, positives, negatives)
 
-            # Update total distances for average
-            total_neg_dist += float(anchors_negatives_dist)
-            total_pos_dist += float(anchors_positives_dist)
+            # Loop through all individual embeddings
+            for i, anchor in enumerate(anchors_output): # Loops through the images in the batches
+                # Calculate the squared L2 distance between each output
+                anchors_positives_dist = torch.norm(anchors_output[i] - positives_output[i])**2
+                anchors_negatives_dist = torch.norm(anchors_output[i] - negatives_output[i])**2
 
-            # On first epoch, set threshold to a little less than average positive distance
-            # Set threshold increment to be 5% of average positive distance
-            if first_epoch:
-                threshold = 0.8*float(anchors_positives_dist)
-                threshold_increment = 0.05*float(anchors_positives_dist)
+                # Update total distances for average
+                total_neg_dist += float(anchors_negatives_dist)
+                total_pos_dist += float(anchors_positives_dist)
 
-            # Predict if positives and anchors are the same
-            if anchors_positives_dist < threshold:
-                # Anchors and positve are predicted the same
-                true_positives_count += 1
+                # Skip predictions on first run (just trying to get a set of thresholds to try)
+                if not first_run: 
+                    # Predict if positives and anchors are the same
+                    if anchors_positives_dist < threshold:
+                        # Anchors and positve are predicted the same
+                        true_positives_count += 1
+                    else:
+                        # Anchors and positive are predicted different
+                        false_negatives_count += 1
+
+                    if anchors_negatives_dist > threshold:
+                        # Anchors and negative are predicted different
+                        true_negatives_count += 1
+                    else:
+                        # Anchors and negative are predicted the same
+                        false_positives_count += 1
+
+                total_img_count += 1
+                data_count += 1
+
+            average_pos_dist = total_pos_dist/(total_img_count)
+            average_neg_dist = total_neg_dist/(total_img_count)
+
+            if first_run:
+                print("Average positives dist: ", average_pos_dist)
+                print("Average negatives dist: ", average_neg_dist)
+
+        if not first_run:
+            print("Number of images tested: ", total_img_count)
+            print("FN COUNT: ", false_negatives_count)
+            print("FP COUNT: ", false_positives_count)
+            print("TN COUNT: ", true_negatives_count)
+            print("TP COUNT: ", true_positives_count)
+
+            # Caclulate metrics for each epoch tested
+            if true_positives_count+false_positives_count:
+                tp_rate = 100*true_positives_count/(true_positives_count+false_positives_count)
+                fp_rate = 100*false_positives_count/(true_positives_count+false_positives_count)
             else:
-                # Anchors and positive are predicted different
-                false_negatives_count += 1
+                tp_rate = 0
+                fp_rate = 0
 
-            if anchors_negatives_dist > threshold:
-                # Anchors and negative are predicted different
-                true_negatives_count += 1
+            if true_negatives_count+false_negatives_count:
+                tn_rate = 100*true_negatives_count/(true_negatives_count+false_negatives_count)
+                fn_rate = 100*false_negatives_count/(true_negatives_count+false_negatives_count)
             else:
-                # Anchors and negative are predicted the same
-                false_positives_count += 1
+                tn_rate = 0
+                fn_rate = 0
 
-            total_img_count += 1
+            accuracy = 100*(true_negatives_count+true_positives_count)/(true_negatives_count+\
+                        true_positives_count+false_negatives_count+false_positives_count)
+
+            # Save threshold, tp_rate, tn_rate, and accuracy for plotting
+            thresh_vals.append(threshold)
+            tp_vals.append(tp_rate)
+            tn_vals.append(tn_rate)
+            acc_vals.append(accuracy)
+
+            # Reset counts for next run
+            true_positives_count = 0
+            true_negatives_count = 0
+            false_negatives_count = 0
+            false_positives_count = 0
+
+            # Increase threshold
+            threshold += threshold_increment
+
+            print("TP Rate at threshold = ", threshold, ": ", tp_rate)
+            print("TN Rate at threshold = ", threshold, ": ", tn_rate)
+            print("FP Rate at threshold = ", threshold, ": ", fp_rate)
+            print("FN Rate at threshold = ", threshold, ": ", fn_rate)
+            print("Accuracy at threshold = ", threshold, ": ", accuracy)
+
+            print("------------------------------------------------------------------- \n")
+            number_of_thresholds_tested += 1
+        else:
+            threshold = 0.8*float(average_pos_dist)
+            threshold_increment = (1.2*average_neg_dist - 0.8*average_pos_dist) / number_of_thresholds_to_try
+            first_run = False
+
+        print("Data count: ", data_count)
+        data_count = 0
+        # Update best threshold
+        if accuracy > best_accuracy:
+            best_accuracy = accuracy
+            best_threshold = threshold
 
         average_pos_dist = total_pos_dist/(total_img_count)
         average_neg_dist = total_neg_dist/(total_img_count)
         print("Average positives dist: ", average_pos_dist)
         print("Average negatives dist: ", average_neg_dist)
-
-        print("Number of images tested: ", total_img_count)
-        print("FN COUNT: ", false_negatives_count)
-        print("FP COUNT: ", false_positives_count)
-        print("TN COUNT: ", true_negatives_count)
-        print("TP COUNT: ", true_positives_count)
-
-        # Caclulate metrics for each epoch tested
-        if true_positives_count+false_positives_count:
-            tp_rate = 100*true_positives_count/(true_positives_count+false_positives_count)
-            fp_rate = 100*false_positives_count/(true_positives_count+false_positives_count)
-        else:
-            tp_rate = 0
-            fp_rate = 0
-
-        if true_negatives_count+false_negatives_count:
-            tn_rate = 100*true_negatives_count/(true_negatives_count+false_negatives_count)
-            fn_rate = 100*false_negatives_count/(true_negatives_count+false_negatives_count)
-        else:
-            tn_rate = 0
-            fn_rate = 0
-
-        accuracy = 100*(true_negatives_count+true_positives_count)/(true_negatives_count+\
-                    true_positives_count+false_negatives_count+false_positives_count)
-
-        # Save threshold, tp_rate, tn_rate, and accuracy for plotting
-        thresh_vals.append(threshold)
-        tp_vals.append(tp_rate)
-        tn_vals.append(tn_rate)
-        acc_vals.append(accuracy)
-
-        # Reset counts for next epoch
-        true_positives_count = 0
-        true_negatives_count = 0
-        false_negatives_count = 0
-        false_positives_count = 0
-
-        # Increase threshold
-        threshold += threshold_increment
-
-        print("TP Rate at threshold = ", threshold, ": ", tp_rate)
-        print("TN Rate at threshold = ", threshold, ": ", tn_rate)
-        print("FP Rate at threshold = ", threshold, ": ", fp_rate)
-        print("FN Rate at threshold = ", threshold, ": ", fn_rate)
-        print("Accuracy at threshold = ", threshold, ": ", accuracy)
-
-        print("------------------------------------------------------------------- \n")
-
-    # Update best threshold
-    if accuracy > best_accuracy:
-        best_accuracy = accuracy
-        best_threshold = threshold
-
-    average_pos_dist = total_pos_dist/(total_img_count+1)
-    average_neg_dist = total_neg_dist/(total_img_count+1)
-    print("Average positives dist: ", average_pos_dist)
-    print("Average negatives dist: ", average_neg_dist)
 
     # average_thresh = average_pos_dist + (average_neg_dist - average_pos_dist)/2 # Keeping this commented out for now, stil deciding on best way to calculate output threshold
     plt.plot(thresh_vals, tp_vals, color = 'r', label = "tp_rate")
@@ -261,4 +276,4 @@ def test_thresholds(model, test_loader, device, path_to_folder):
     plt.legend()
     plt.savefig(path_to_folder + '/thresh_test.png')
 
-    return best_threshold
+    return best_threshold, best_accuracy
