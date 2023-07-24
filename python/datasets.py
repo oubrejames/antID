@@ -7,7 +7,10 @@ import random
 from PIL import Image
 
 class TripletAntsDataset(Dataset):
-    """"""
+    """
+    Dataset class for the triplet ants dataset. Returns a triplet of images and the label of the 
+    anchor image.
+    """
 
     def __init__(self, csv_file, root_dir, transform=None):
         """
@@ -32,7 +35,6 @@ class TripletAntsDataset(Dataset):
                                 self.labels.iloc[idx, 0],       # Directory to specific ant folder
                                 self.labels.iloc[idx, 1])       # Filename of anchor image
 
-        # anchor_image = io.imread(anchor_path)
         anchor_image = Image.open(anchor_path)
 
         positive_path = anchor_path
@@ -42,12 +44,12 @@ class TripletAntsDataset(Dataset):
                                          self.labels.iloc[idx, 0], 
                                          pos_img_name)
 
-        # positive_image = io.imread(positive_path)
         positive_image = Image.open(positive_path)
     
         positive_dir=  os.path.join(self.root_dir,               # Directory to all ant folders
                                 self.labels.iloc[idx, 0])       # Directory to specific ant folder
         negative_dir = positive_dir
+
         while negative_dir == positive_dir:
             negative_dir = random.choice(os.listdir(self.root_dir))
 
@@ -59,20 +61,9 @@ class TripletAntsDataset(Dataset):
             neg_img_name = random.choice(os.listdir(negative_dir_path))
             negative_path = os.path.join(negative_dir_path, neg_img_name)
 
-
-        # negative_image = io.imread(negative_path)
         negative_image = Image.open(negative_path)
 
-        # sample = {'anchor': anchor_image,
-        #           'positive': positive_image,
-        #           'negative': negative_image,
-        #           'label': self.labels.iloc[idx, 0]}
-
         if self.transform:
-            # sample = {'anchor':  self.transform(anchor_image),
-            #           'positive':  self.transform(positive_image),
-            #           'negative':  self.transform(negative_image),
-            #           'label': self.labels.iloc[idx, 0]}
             anchor_image = self.transform(anchor_image)
             positive_image = self.transform(positive_image)
             negative_image = self.transform(negative_image)
@@ -80,7 +71,9 @@ class TripletAntsDataset(Dataset):
         return anchor_image, positive_image, negative_image, str(self.labels.iloc[idx, 0])
 
 class AntsDataset(Dataset):
-    """"""
+    """
+    Dataset class for the ants dataset. Returns an image and the label of the image.
+    """
 
     def __init__(self, csv_file, root_dir, transform=None):
         """
@@ -105,7 +98,6 @@ class AntsDataset(Dataset):
                                 self.labels.iloc[idx, 0],       # Directory to specific ant folder
                                 self.labels.iloc[idx, 1])       # Filename of anchor image
 
-        # anchor_image = io.imread(anchor_path)
         anchor_image = Image.open(anchor_path)
 
         if self.transform:
