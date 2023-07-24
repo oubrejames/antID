@@ -1,121 +1,98 @@
-from trainer import fit
 import torch
 import torch.nn as nn
-import torch.optim as optim
-from torch.optim import lr_scheduler
 import torch.backends.cudnn as cudnn
-import numpy as np
-import torchvision
-from torchvision import datasets, models, transforms
-import matplotlib.pyplot as plt
-import time
-import os
-from PIL import Image
-from tempfile import TemporaryDirectory
+from torchvision import transforms
 from datasets import TripletAntsDataset
 from networks import TripletNet, EmbeddingNet, FaceNet
-from trainer import fit_triplet
-from testing import test_model, test_thresholds
+from tester import test_model, test_thresholds
+import random
+import numpy as np
 
+######### PARAMETERS #########
+embedding_network = FaceNet()
+batch_size = 100
+model_number = 22
+gpu_id = "cuda:1"
+gpu_parallel = False
+##############################
+
+
+# Enable benchmarking for faster runtime
 cudnn.benchmark = True
 
-# Data augmentation and normalization for training
-# Just normalization for validation
-data_transforms = {
-    'crop_norm': transforms.Compose([
-        transforms.Resize(375),
-        transforms.CenterCrop(375),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-    ])
-}
 
-data_dir = '../unseen_data'
-csv_file = '../unseen_data/labels.csv'
-dataset = TripletAntsDataset(csv_file, data_dir, transform=data_transforms['crop_norm'])
-
-test_loader = torch.utils.data.DataLoader(dataset, batch_size=100, shuffle=True, num_workers=4)
+# Resize and normalize the images
+data_transforms = transforms.Compose([
+                transforms.Resize(375),
+                transforms.CenterCrop(375),
+                transforms.ToTensor(),
+                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+            ])
 
 
-data_dir = '../ant_face_data'
-csv_file = '../ant_face_data/labels.csv'
-full_dataset = TripletAntsDataset(csv_file, data_dir, transform=data_transforms['crop_norm'])
-train_size = int(0.8 * len(full_dataset))
-# val_size = int(0.1 * len(full_dataset))
-# test_size = len(full_dataset) - train_size - val_size
-# train_set, val_set, test_set = torch.utils.data.random_split(full_dataset, [train_size, val_size, test_size])
-# val_loader = torch.utils.data.DataLoader(val_set, batch_size=100, shuffle=True, num_workers=4)
+# Create dataset and dataloader for unseen ant data
+unseen_dir = '../unseen_data'
+unseen_csv = '../unseen_data/labels.csv'
+unseen_dataset = TripletAntsDataset(unseen_csv, unseen_dir, transform=data_transforms)
+unseen_test_loader = torch.utils.data.DataLoader(unseen_dataset, batch_size=100, shuffle=True, num_workers=4)
 
-# With no testing
-val_size = len(full_dataset) - train_size
-train_set, val_set = torch.utils.data.random_split(full_dataset, [train_size, val_size])
-val_loader = torch.utils.data.DataLoader(val_set, batch_size=100, shuffle=True, num_workers=4)
 
-model = TripletNet(EmbeddingNet())
-device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
-# model = nn.DataParallel(model, device_ids=[0, 1]) # Use both GPUs
+# Create dataset and dataloader for seen ant data
+seen_dir = '../ant_face_data'
+seen_csv = '../ant_face_data/labels.csv'
+seen_dataset = TripletAntsDataset(seen_csv, seen_dir, transform=data_transforms)
 
-model.load_state_dict(torch.load('../models/triplet_net_22/best_model.pt'))
+
+# Set random seed for reproducibility of split among different scripts
+torch.manual_seed(0)
+random.seed(0)
+np.random.seed(0)
+
+
+# Split dataset into train, validation, and test sets
+train_size = int(0.8 * len(seen_dataset))
+val_size = int(0.1 * len(seen_dataset))
+test_size = len(seen_dataset) - train_size - val_size
+train_set, val_set, test_set = torch.utils.data.random_split(seen_dataset, [train_size, val_size, test_size])
+
+
+# Create dataloaders
+train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=4)
+seen_val_loader = torch.utils.data.DataLoader(val_set, batch_size=batch_size, shuffle=True, num_workers=4)
+seen_test_loader = torch.utils.data.DataLoader(test_set, batch_size=batch_size, shuffle=True, num_workers=4)
+dataloaders = {'train': train_loader, 'val': seen_val_loader, 'test': seen_test_loader, 'unseen': unseen_test_loader}
+
+
+# Create model
+model = TripletNet(embedding_network)
+device = torch.device(gpu_id if torch.cuda.is_available() else "cpu")
+
+if gpu_parallel:
+    model = nn.DataParallel(model, device_ids=[0,1]) # Use both GPUs
+
+
+# Load trained model and put into evaluation mode
+trained_model_path = '../models/triplet_net_' + str(model_number) + '/best_model.pt'
+model.load_state_dict(torch.load(trained_model_path))
 model.eval()
-latest_model_seq =22
 
 
-# ##### Get thresh
-# # Get model sequence number
-# existing_models = os.listdir("../models")
-# latest_model_seq = 0
-# for existing_model in existing_models:
-#     tmp_id = existing_model.split(".")[0][-1]
-#     print("TMP ID: ", tmp_id)
-#     if int(tmp_id) > latest_model_seq:
-#         latest_model_seq = tmp_id
+# Create final model name for saving
+final_model_folder = "../models/triplet_net_" + str(model_number)
 
 
-# Create final model name
-final_model_folder = "../models/triplet_net_" + str(latest_model_seq)
+# Test model thresholds on validation data to find best threshold
+best_threshold = test_thresholds(model, seen_val_loader, device, final_model_folder)
+print("Best threshold : ", best_threshold)
 
-average_thresh = test_thresholds(model, test_loader, device, final_model_folder)
-#220
-# average_thresh = 25*(10**13)
-# print("##### Average threshold : ", average_thresh)
-test_model(model, test_loader, device, average_thresh   )
 
-######### Some notes
-"""
-Model 9: output 128 x1
-        margin 0.7
-        ACC: ~67
+# Test model on seen test data
+print("Testing model on seen test data...")
+test_model(model, seen_test_loader, device, best_threshold)
+print("-" * 50, '\n')
 
-Model 10: output 128 x1
-        margin 2
-        ACC: ~ 74
-    
-Model 13: output 256 x1
-        margin 0.7
-        ACC: ~66
 
-Model 12: output 256 x1
-        margin 2
-        ACC: ~68
-
-Model 14: output 256 x1
-        margin 4
-        ACC: ~75 - 77 ON THRESH TEST BUT ONLY 66 ON TEST
-
-Model 15: output 128 x1
-        margin 4
-        ACC: ~70
-
-Model 16: output 100 x1
-        margin 0.7
-        ACC: ~70
-
-Model 17: output 100 x1
-        margin 2
-        ACC: ~68
-
-Model try: output 128 x1
-        margin 2 p =4
-        ACC: ~
-"""
+# Test model on unseen test data
+print("Testing model on unseen test data...")
+test_model(model, unseen_test_loader, device, best_threshold)
+print("-" * 50, '\n')
