@@ -1,4 +1,5 @@
 import torch.nn as nn 
+from ultralytics import YOLO
 
 class CNN(nn.Module):
     def __init__(self, num_classes):
@@ -63,6 +64,62 @@ class EmbeddingNet(nn.Module):
     def get_embedding(self, x):
         return self.forward(x)
 
+class EN2(nn.Module):
+    def __init__(self):
+        super(EN2, self).__init__()
+        self.convnet = nn.Sequential(nn.Conv2d(3, 32, 5), nn.PReLU(),
+                                     nn.MaxPool2d(2, stride=2),
+                                     nn.Conv2d(32, 64, 7), nn.PReLU(),
+                                     nn.MaxPool2d(2, stride=2),
+                                     nn.Conv2d(64, 64, 9),
+                                     nn.MaxPool2d(2, stride=2))#,
+                                    #  nn.Conv2d(64, 128, 9), nn.PReLU(),
+                                    #  nn.MaxPool2d(3, stride=2))
+
+        self.fc = nn.Sequential(nn.Linear(102400 , 256), #518400
+                                nn.PReLU(),
+                                nn.Linear(256, 256),
+                                nn.PReLU(),
+                                nn.Linear(256, 128)
+                                )
+
+    def forward(self, x):
+        output = self.convnet(x)
+        output = output.view(output.size()[0], -1)
+        output = self.fc(output)
+        return output
+
+    def get_embedding(self, x):
+        return self.forward(x)
+
+class EN3(nn.Module):
+    def __init__(self):
+        super(EN3, self).__init__()
+        self.convnet = nn.Sequential(nn.Conv2d(3, 32, 5), nn.PReLU(),
+                                     nn.MaxPool2d(2, stride=2),
+                                     nn.Conv2d(32, 32, 5), nn.PReLU(),
+                                     nn.MaxPool2d(2, stride=2),
+                                     nn.Conv2d(32, 64, 5),
+                                     nn.MaxPool2d(2, stride=2),
+                                     nn.Conv2d(64, 64, 5), nn.PReLU(),
+                                     nn.MaxPool2d(2, stride=2))
+
+        self.fc = nn.Sequential(nn.Linear(23104 , 256), #518400
+                                nn.PReLU(),
+                                nn.Linear(256, 256),
+                                nn.PReLU(),
+                                nn.Linear(256, 128)
+                                )
+
+    def forward(self, x):
+        output = self.convnet(x)
+        output = output.view(output.size()[0], -1)
+        output = self.fc(output)
+        return output
+
+    def get_embedding(self, x):
+        return self.forward(x)
+
 class TripletNet(nn.Module):
     def __init__(self, embedding_net):
         super(TripletNet, self).__init__()
@@ -107,6 +164,39 @@ class FaceNet(nn.Module):
 
     def forward(self, x):
         output = self.convnet(x)
+        output = output.view(output.size()[0], -1)
+        output = self.fc(output)
+        return output
+
+    def get_embedding(self, x):
+        return self.forward(x)
+    
+class TransferYOLO(nn.Module):
+    def __init__(self):
+        super(TransferYOLO, self).__init__()
+        yolo= YOLO("YOLO_V8/runs/detect/yolov8s_v8_25e6/weights/best.pt")
+        yolo = yolo.model.__dict__["_modules"]["model"]
+        self.new_yolo = nn.Sequential(*list(yolo.children())[:-3])
+
+        self.convnet = nn.Sequential(nn.Conv2d(3, 32, 5), nn.PReLU(),
+                                nn.MaxPool2d(2, stride=2),
+                                nn.Conv2d(32, 32, 5), nn.PReLU(),
+                                nn.MaxPool2d(2, stride=2),
+                                nn.Conv2d(32, 64, 5),
+                                nn.MaxPool2d(2, stride=2),
+                                nn.Conv2d(64, 64, 5), nn.PReLU(),
+                                nn.MaxPool2d(2, stride=2))
+
+        self.fc = nn.Sequential(nn.Linear(102400 , 256), #518400
+                                nn.PReLU(),
+                                nn.Linear(256, 256),
+                                nn.PReLU(),
+                                nn.Linear(256, 128)
+                                )
+    def forward(self, x):
+        x = x.squeeze(0)
+        output = self.new_yolo(x)
+        output = self.convnet(output)
         output = output.view(output.size()[0], -1)
         output = self.fc(output)
         return output
