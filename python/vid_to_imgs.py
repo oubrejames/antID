@@ -95,6 +95,7 @@ def main():
         cap.release()
         print("Finished processing video: " + ant_video)
         print("Saved " + str(img_cnt) + " images to labeled_images/" + ant_id)
+        img_cnt = 0
         print("------------------------------------------------------------\n")
 
 if __name__ == "__main__":
