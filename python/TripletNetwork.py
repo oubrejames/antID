@@ -8,19 +8,20 @@ import numpy as np
 from torchvision import transforms
 import os
 from datasets import TripletAntsDataset
-from networks import TripletNet, EmbeddingNet, FaceNet
+from networks import TripletNet, EmbeddingNet, FaceNet, EN2, TransferYOLO, EN3
 from trainer import fit_triplet
 from tester import test_model
 import shutil
 from plot_loss import plot_loss
 from trainer import EarlyStopper
-
+import pandas as pd
+import matplotlib.pyplot as plt
 """
 This script trains a triplet network on the ant face dataset.
 """
 
 ######### PARAMETERS #########
-embedding_network = FaceNet()
+embedding_network = EN3()
 batch_size = 100
 loss_margin = 0.5
 loss_p = 2
@@ -45,6 +46,63 @@ data_transforms = transforms.Compose([
                 transforms.ToTensor(),
                 transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
             ])
+
+
+
+#################################################################################################
+#################################################################################################
+#################### TESTING WITH BALANCED DATA #############################
+#################################################################################################
+#################################################################################################
+
+# #Upload the data and save it to a Dataframe.
+# df = pd.read_csv( '../ant_face_data/labels.csv', header=None)
+# df=pd.DataFrame(df)
+# print("df size: ", df.shape)
+
+# # Check the class distribution. (Hint: Use .value_counts attribute and 
+# # remember that the labels are at the last column of the dataframe)
+# results = df[0]
+
+
+# # Ants 11, 12, 16, and 26 have much more instances than the other training data and ant 8 has barely
+# # any.
+# # Make the dataset more balanced by sampling ants 11, 12, 16, and 26 and removing ant 8
+# missing_ants = df.drop(df[df[0] == 'ant_11'])
+# # The value you want to remove from the DataFrame
+# target_classes = ["ant_11", "ant_12", "ant_16", "ant_26", "ant_8"]
+
+# filtered_df = df
+# for target_class in target_classes:
+#     # Boolean indexing to filter out rows with the target_class
+#     filtered_df = filtered_df[filtered_df[0] != target_class]
+
+# # print(missing_ants)
+# # missing_ants.drop(missing_ants[missing_ants[0] == 'ant_12'])
+# # missing_ants = missing_ants.drop(missing_ants[missing_ants[0] == 'ant_16'])
+# # missing_ants = missing_ants.drop(missing_ants[missing_ants[0] == 'ant_26'])
+# # missing_ants = missing_ants.drop(missing_ants[missing_ants[0] == 'ant_8'])
+
+# all_11 = df[df[0] == 'ant_11']
+# all_12 = df[df[0] == 'ant_12']
+# all_16 = df[df[0] == 'ant_16']
+# all_26 = df[df[0] == 'ant_26']
+
+# smaller_11 = all_11.sample(860)
+# smaller_12 = all_12.sample(860)
+# smaller_16 = all_16.sample(860)
+# smaller_26 = all_26.sample(860)
+
+# # # balanced_df = balanced_df.drop(df[df[0] == 'ant_12'].sample(860).index)
+# # # balanced_df = balanced_df.drop(df[df[0] == 'ant_16'].sample(860).index)
+# # # balanced_df = balanced_df.drop(df[df[0] == 'ant_26'].sample(860).index)
+# # # balanced_df = balanced_df.drop(df[df[0] == 'ant_8'])
+# balanced_df = pd.concat([smaller_11, smaller_12, smaller_16, smaller_26, filtered_df], axis=0)
+# csv_file = balanced_df
+#################################################################################################
+#################################################################################################
+#################################################################################################
+#################################################################################################
 
 
 # Create dataset
