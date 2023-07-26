@@ -62,8 +62,7 @@ def train_one_epoch(model, data_loader, optimizer, criterion, device):
     # Iterate over data.
     for inputs, labels in data_loader:
         inputs = inputs.to(device)
-        labels = labels.to(device) # Comment out depending on loss function
-
+        labels = labels.to(device)
         # Zero gradients for the optimizer
         optimizer.zero_grad()
 
@@ -105,8 +104,8 @@ def validate_one_epoch(model, data_loader, optimizer, criterion, device):
     # Get dataset size
     dataset_size = len(data_loader.dataset)
 
-    # Set model to training mode
-    model.train()
+    # Set model to evaluation mode
+    model.eval()
 
     # Initialize running count for loss and correct predictions
     running_loss = 0.0
@@ -165,6 +164,7 @@ def fit(model, dataloaders, criterion, optimizer, scheduler, device, num_epochs=
         # Initialize best validation accuracy
         best_val_acc = 0.0
 
+        model.to(device)
         # Iterate over epochs
         for epoch in range(num_epochs):
             print(f'Epoch {epoch}/{num_epochs - 1}')

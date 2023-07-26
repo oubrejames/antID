@@ -3,18 +3,20 @@ import torch.nn as nn
 import torch.backends.cudnn as cudnn
 from torchvision import transforms
 from datasets import TripletAntsDataset
-from networks import TripletNet, EmbeddingNet, FaceNet
+from networks import TripletNet, EmbeddingNet, FaceNet, EN2
 from tester import test_model, test_thresholds
 import random
 import numpy as np
 
 ######### PARAMETERS #########
-embedding_network = EmbeddingNet()
-batch_size = 100
-model_number = 22
+embedding_network = EN2()
+batch_size = 70
+model_number = 26
 gpu_id = "cuda:1"
 gpu_parallel = False
 test_thresh = True
+if not test_thresh:
+    best_threshold = 2.5
 ##############################
 
 
@@ -87,16 +89,22 @@ if test_thresh:
     best_threshold, best_accuracy = test_thresholds(model, seen_val_loader, device, final_model_folder)
     print("Best threshold : ", best_threshold, "Accuracy: ", best_accuracy)
 
+# Test model on training data
+print("\n","*" * 100)
+print("\nTesting model on trainnig data...\n")
+test_model(model, train_loader, device, best_threshold)
+print("-" * 50, '\n')
+
 
 # Test model on seen test data
-print("\n","*" * 50)
+print("\n","*" * 100)
 print("\nTesting model on seen test data...\n")
 test_model(model, seen_test_loader, device, best_threshold)
 print("-" * 50, '\n')
 
 
 # Test model on unseen test data
-print("\n","*" * 50)
+print("\n","*" * 100)
 print("\nTesting model on unseen test data...\n")
 test_model(model, unseen_test_loader, device, best_threshold)
 print("-" * 50, '\n')
