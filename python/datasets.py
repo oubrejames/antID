@@ -20,7 +20,10 @@ class TripletAntsDataset(Dataset):
             transform (callable, optional): Optional transform to be applied
                 on a sample.
         """
-        self.labels = pd.read_csv(csv_file)
+        if isinstance(csv_file, pd.DataFrame):
+            self.labels = csv_file
+        elif isinstance(csv_file, str):
+            self.labels = pd.read_csv(csv_file)
         self.root_dir = root_dir
         self.transform = transform
 
@@ -83,7 +86,10 @@ class AntsDataset(Dataset):
             transform (callable, optional): Optional transform to be applied
                 on a sample.
         """
-        self.labels = pd.read_csv(csv_file)
+        if isinstance(csv_file, pd.DataFrame):
+            self.labels = csv_file
+        elif isinstance(csv_file, str):
+            self.labels = pd.read_csv(csv_file)
         self.root_dir = root_dir
         self.transform = transform
 
@@ -103,4 +109,6 @@ class AntsDataset(Dataset):
         if self.transform:
             anchor_image = self.transform(anchor_image)
 
-        return anchor_image, str(self.labels.iloc[idx, 0])
+        # Get ant id
+        ant_id = torch.tensor(int(self.labels.iloc[idx, 0].split("_")[-1]))
+        return anchor_image, ant_id
