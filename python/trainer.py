@@ -29,7 +29,7 @@ class EarlyStopper:
         if validation_loss < self.min_validation_loss:
             self.min_validation_loss = validation_loss
             self.counter = 0
-        elif validation_loss > (self.min_validation_loss + self.min_delta):
+        elif validation_loss >= (self.min_validation_loss + self.min_delta):
             self.counter += 1
             if self.counter >= self.patience:
                 return True
@@ -83,7 +83,7 @@ def train_one_epoch(model, data_loader, optimizer, criterion, device):
         running_corrects += torch.sum(preds == labels.data)
 
     epoch_loss = running_loss / dataset_size
-    epoch_acc = running_corrects.double() / dataset_size
+    epoch_acc = 100*running_corrects.double() / dataset_size
 
     return model, epoch_loss, epoch_acc
 
@@ -132,7 +132,7 @@ def validate_one_epoch(model, data_loader, optimizer, criterion, device):
         running_corrects += torch.sum(preds == labels.data)
 
     epoch_loss = running_loss / dataset_size
-    epoch_acc = running_corrects.double() / dataset_size
+    epoch_acc = 100*running_corrects.double() / dataset_size
 
     return epoch_loss, epoch_acc
 
@@ -174,8 +174,10 @@ def fit(model, dataloaders, criterion, optimizer, scheduler, device, num_epochs=
             model, train_loss, train_acc = train_one_epoch(model, dataloaders['train'], optimizer, criterion, device)
             scheduler.step() # Update learning rate
             val_loss, val_acc = validate_one_epoch(model, dataloaders['val'], optimizer, criterion, device)
-            print('Training Loss: {:.4f} Acc: {:.4f}'.format(train_loss, train_acc))
-            print('Validation Loss: {:.4f} Acc: {:.4f}'.format(val_loss, val_acc))
+            # print('Training Loss: {:.4f} Acc: {:.4f}'.format(train_loss, train_acc))
+            # print('Validation Loss: {:.4f} Acc: {:.4f}'.format(val_loss, val_acc))
+            print('Training Loss:  Acc: ', train_loss, train_acc[0])
+            print('Validation Loss:  Acc: '.format(val_loss, val_acc))
 
             # Update best validation accuracy
             if val_acc > best_val_acc:
@@ -322,9 +324,12 @@ def fit_triplet(model, dataloaders, criterion, optimizer, scheduler, device, num
             model.eval()
             val_loss = validate_one_epoch_triplet(model, dataloaders['val'], optimizer, criterion, device)
 
-            print('Training Loss: {:.4f}'.format(train_loss))
-            print('Validation Loss: {:.4f}'.format(val_loss))
+            # print('Training Loss: {:.4f}'.format(train_loss))
+            # print('Validation Loss: {:.4f}'.format(val_loss))
 
+            print('Training Loss: ',(train_loss))
+            print('Validation Loss: ',(val_loss))
+            
             # Save loss as a csv
             with open(os.path.join("../", "loss.csv"), "a") as f:
                 writer = csv.writer(f)
