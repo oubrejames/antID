@@ -3,9 +3,32 @@ import numpy as np
 from roboflow import Roboflow
 import os
 from ultralytics import YOLO
+import torch
 
-# Import yolo model
-model= YOLO("YOLO_V8/runs/detect/yolov8s_v8_25e6/weights/best.pt")
+# Choose witch model to use (true for bodies false for heads)
+ant_body_flag = True
+
+# Flag for if you are adding to the unseen dataset for testing
+unseen_test_flag = False
+
+# Import yolo model and choose correct directories for images and videos
+videos_directory = "../labeled_vids"
+if ant_body_flag:
+    model= YOLO("YOLO_Body/runs/detect/yolov8s_v8_25e3/weights/best.pt")
+    labelled_image_dir = "../labeled_images_bodies/"
+    if unseen_test_flag:
+        labelled_image_dir = "../unseen_body_imgs"
+        videos_directory = "../unseen_vids"
+else:
+    model= YOLO("YOLO_V8/runs/detect/yolov8s_v8_25e6/weights/best.pt")
+    labelled_image_dir = "../labeled_images/"
+    if unseen_test_flag:
+        labelled_image_dir = "../unseen_images"
+        videos_directory = "../unseen_vids"
+
+# Put on GPU 1
+device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+model.to(device)
 
 def get_head_box(im):
     """Take a video frame and return the bounding box of the ant head if it exists.
@@ -44,17 +67,13 @@ def main():
     img_cnt = 0
 
     # Loop through all videos in labeled_videos
-    videos_directory = "../labeled_vids"
-    # videos_directory = "../unseen_vids" # Two video directories to make training and testing data
-
     print("Processing videos in " + videos_directory)
     for ant_video in os.listdir(videos_directory):
         path_to_video = os.path.join(videos_directory, ant_video)
 
         # Create path to save images
         ant_id = path_to_video.split("/")[-1].split(".")[0]
-        path_to_imgs = "../labeled_images/" + ant_id
-        # path_to_imgs = "../unseen_images/" + ant_id # Must change images_directory for unseen_images
+        path_to_imgs = labelled_image_dir + ant_id
 
         # Check if directory already exists
         if os.path.exists(path_to_imgs):
