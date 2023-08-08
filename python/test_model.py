@@ -3,20 +3,21 @@ import torch.nn as nn
 import torch.backends.cudnn as cudnn
 from torchvision import transforms
 from datasets import TripletAntsDataset
-from networks import TripletNet, EmbeddingNet, FaceNet, EN2
+from networks import TripletNet, EmbeddingNet, FaceNet, EN2, CNN_EN, EN4, EN5
 from tester import test_model, test_thresholds
 import random
 import numpy as np
 
 ######### PARAMETERS #########
-embedding_network = EN2()
+embedding_network = EN4()
 batch_size = 70
-model_number = 26
+model_number = 60
 gpu_id = "cuda:1"
 gpu_parallel = False
 test_thresh = True
+body_flag = True
 if not test_thresh:
-    best_threshold = 2.5
+    best_threshold = 38.5
 ##############################
 
 
@@ -33,16 +34,27 @@ data_transforms = transforms.Compose([
             ])
 
 
+# Choose correct dataset based on using body or not
+if body_flag:
+    unseen_dir = '../unseen_body_data'
+    unseen_csv = '../unseen_body_data/labels.csv'
+    seen_dir = '../ant_body_data'
+    seen_csv = '../ant_body_data/labels.csv'
+    model_folder = '../models/triplet_net_body_'
+else:
+    unseen_dir = '../unseen_data'
+    unseen_csv = '../unseen_data/labels.csv'
+    seen_dir = '../ant_face_data'
+    seen_csv = '../ant_face_data/labels.csv'
+    model_folder = '../models/triplet_net_'
+
+
 # Create dataset and dataloader for unseen ant data
-unseen_dir = '../unseen_data'
-unseen_csv = '../unseen_data/labels.csv'
 unseen_dataset = TripletAntsDataset(unseen_csv, unseen_dir, transform=data_transforms)
-unseen_test_loader = torch.utils.data.DataLoader(unseen_dataset, batch_size=100, shuffle=True, num_workers=4)
+unseen_test_loader = torch.utils.data.DataLoader(unseen_dataset, batch_size=70, shuffle=True, num_workers=4)
 
 
 # Create dataset and dataloader for seen ant data
-seen_dir = '../ant_face_data'
-seen_csv = '../ant_face_data/labels.csv'
 seen_dataset = TripletAntsDataset(seen_csv, seen_dir, transform=data_transforms)
 
 
@@ -75,13 +87,13 @@ if gpu_parallel:
 
 
 # Load trained model and put into evaluation mode
-trained_model_path = '../models/triplet_net_' + str(model_number) + '/best_model.pt'
+trained_model_path = model_folder + str(model_number) + '/best_model.pt'
 model.load_state_dict(torch.load(trained_model_path, map_location=device))
 model.eval()
 
 
 # Create final model name for saving
-final_model_folder = "../models/triplet_net_" + str(model_number)
+final_model_folder = model_folder + str(model_number)
 
 
 # Test model thresholds on validation data to find best threshold
@@ -90,17 +102,17 @@ if test_thresh:
     print("Best threshold : ", best_threshold, "Accuracy: ", best_accuracy)
 
 # Test model on training data
-print("\n","*" * 100)
-print("\nTesting model on trainnig data...\n")
-test_model(model, train_loader, device, best_threshold)
-print("-" * 50, '\n')
+# print("\n","*" * 100)
+# print("\nTesting model on trainnig data...\n")
+# test_model(model, train_loader, device, best_threshold)
+# print("-" * 50, '\n')
 
 
-# Test model on seen test data
-print("\n","*" * 100)
-print("\nTesting model on seen test data...\n")
-test_model(model, seen_test_loader, device, best_threshold)
-print("-" * 50, '\n')
+# # Test model on seen test data
+# print("\n","*" * 100)
+# print("\nTesting model on seen test data...\n")
+# test_model(model, seen_test_loader, device, best_threshold)
+# print("-" * 50, '\n')
 
 
 # Test model on unseen test data
