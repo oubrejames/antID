@@ -4,21 +4,29 @@ from ultralytics import YOLO
 class CNN(nn.Module):
     def __init__(self, num_classes):
         super(CNN, self).__init__()
-        self.conv_layer1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3)
-        self.conv_layer2 = nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3)
+        self.conv_layer1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=5)
+        self.conv_layer2 = nn.Conv2d(in_channels=32, out_channels=32, kernel_size=5)
         self.max_pool1 = nn.MaxPool2d(kernel_size = 2, stride = 2)
         
-        self.conv_layer3 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3)
-        self.conv_layer4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3)
+        self.conv_layer3 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=5)
+        self.conv_layer4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=5)
         self.max_pool2 = nn.MaxPool2d(kernel_size = 2, stride = 2)
 
-        self.conv_layer5 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3)
-        self.conv_layer6 = nn.Conv2d(in_channels=128, out_channels=128, kernel_size=3)
+        self.conv_layer5 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=5)
+        self.conv_layer6 = nn.Conv2d(in_channels=128, out_channels=128, kernel_size=5)
         self.max_pool3 = nn.MaxPool2d(kernel_size = 2, stride = 2)
 
-        self.fc1 = nn.Linear(236672 , 128)
+        self.conv_layer7 = nn.Conv2d(in_channels=128, out_channels=256, kernel_size=5)
+        self.conv_layer8 = nn.Conv2d(in_channels=256, out_channels=256, kernel_size=5)
+        self.max_pool4 = nn.MaxPool2d(kernel_size = 2, stride = 2)
+
+        # self.fc1 = nn.Linear(50176 , 256)
+        self.fc1 = nn.Linear(57600 , 256) 
+
         self.relu1 = nn.ReLU()
-        self.fc2 = nn.Linear(128, num_classes)
+        self.fc2 = nn.Linear(256 , 128)
+        self.fc3 = nn.Linear(128, 128)
+        self.fc4 = nn.Linear(128, num_classes)
 
     def forward(self, x):
         out = self.conv_layer1(x)
@@ -33,11 +41,19 @@ class CNN(nn.Module):
         out = self.conv_layer6(out)
         out = self.max_pool3(out)
 
+        out = self.conv_layer7(out)
+        out = self.conv_layer8(out)
+        out = self.max_pool4(out)
+
         out = out.reshape(out.size(0), -1)
         
         out = self.fc1(out)
         out = self.relu1(out)
         out = self.fc2(out)
+        out = self.relu1(out)
+        out = self.fc3(out)
+        out = self.relu1(out)
+        out = self.fc4(out)
         return out
 
 class EmbeddingNet(nn.Module):
@@ -133,7 +149,7 @@ class TripletNet(nn.Module):
 
     def get_embedding(self, x):
         return self.embedding_net(x)
-    
+
 class FaceNet(nn.Module):
     def __init__(self):
         super(FaceNet, self).__init__()
@@ -170,7 +186,7 @@ class FaceNet(nn.Module):
 
     def get_embedding(self, x):
         return self.forward(x)
-    
+
 class TransferYOLO(nn.Module):
     def __init__(self):
         super(TransferYOLO, self).__init__()
@@ -197,6 +213,95 @@ class TransferYOLO(nn.Module):
         x = x.squeeze(0)
         output = self.new_yolo(x)
         output = self.convnet(output)
+        output = output.view(output.size()[0], -1)
+        output = self.fc(output)
+        return output
+
+    def get_embedding(self, x):
+        return self.forward(x)
+
+class CNN_EN(nn.Module):
+    def __init__(self):
+        super(CNN_EN, self).__init__()
+
+        self.convnet = nn.Sequential(nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3),
+                        nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3),
+                        nn.MaxPool2d(kernel_size = 2, stride = 2),
+                        nn.Conv2d(in_channels=32, out_channels=64, kernel_size=5),
+                        nn.Conv2d(in_channels=64, out_channels=64, kernel_size=5),
+                        nn.MaxPool2d(kernel_size = 2, stride = 2),
+
+                        nn.Conv2d(in_channels=64, out_channels=128, kernel_size=5),
+                        nn.Conv2d(in_channels=128, out_channels=128, kernel_size=5),
+                        nn.MaxPool2d(kernel_size = 2, stride = 2),
+
+                        nn.Conv2d(in_channels=128, out_channels=128, kernel_size=7),
+                        nn.Conv2d(in_channels=128, out_channels=128, kernel_size=7),
+                        nn.MaxPool2d(kernel_size = 2, stride = 2))
+
+        self.fc = nn.Sequential(nn.Linear(25088 , 256),
+                                nn.ReLU(),
+                                nn.Linear(256 , 128))
+
+    def forward(self, x):
+        output = self.convnet(x)
+        output = output.view(output.size()[0], -1)
+        output = self.fc(output)
+        return output
+
+    def get_embedding(self, x):
+        return self.forward(x)
+
+
+class EN4(nn.Module):
+    def __init__(self):
+        super(EN4, self).__init__()
+        self.convnet = nn.Sequential(nn.Conv2d(3, 32, 5), nn.PReLU(),
+                                     nn.MaxPool2d(2, stride=2),
+                                     nn.Conv2d(32, 64, 7), nn.PReLU(),
+                                     nn.MaxPool2d(2, stride=2),
+                                     nn.Conv2d(64, 64, 9),
+                                     nn.MaxPool2d(2, stride=2))
+
+        self.fc = nn.Sequential(nn.Linear(102400 , 256), #518400
+                                nn.PReLU(),
+                                nn.Dropout(p=0.2),
+                                nn.Linear(256, 256),
+                                nn.PReLU(),
+                                nn.Dropout(p=0.2),
+                                nn.Linear(256, 128),
+                                # nn.PReLU(),
+                                # nn.Dropout(p=0.2),
+                                # nn.Linear(128, 128)
+                                )
+
+    def forward(self, x):
+        output = self.convnet(x)
+        output = output.view(output.size()[0], -1)
+        output = self.fc(output)
+        return output
+
+    def get_embedding(self, x):
+        return self.forward(x)
+
+class EN5(nn.Module):
+    def __init__(self):
+        super(EN5, self).__init__()
+        self.convnet = nn.Sequential(nn.Conv2d(3, 32, 5), nn.PReLU(),
+                                     nn.MaxPool2d(2, stride=2),
+                                     nn.Conv2d(32, 64, 7), nn.PReLU(),
+                                     nn.MaxPool2d(2, stride=2),
+                                     nn.Conv2d(64, 64, 9),
+                                     nn.MaxPool2d(2, stride=2))
+
+        self.fc = nn.Sequential(nn.Linear(102400 , 256), #518400
+                                nn.PReLU(),
+                                nn.Dropout(p=0.2),
+                                nn.Linear(256, 128)
+                                )
+
+    def forward(self, x):
+        output = self.convnet(x)
         output = output.view(output.size()[0], -1)
         output = self.fc(output)
         return output
