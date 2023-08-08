@@ -277,3 +277,35 @@ def test_thresholds(model, test_loader, device, path_to_folder):
     plt.savefig(path_to_folder + '/thresh_test.png')
 
     return best_threshold, best_accuracy
+
+def test_classifier(model, data_loader, device):
+    """TODO
+    """
+
+    # Get dataset size
+    dataset_size = len(data_loader.dataset)
+
+    # Set model to evaluation mode
+    model.eval()
+
+    # Initialize running count for loss and correct predictions
+    running_corrects = 0
+
+    # Iterate over data.
+    for inputs, labels in data_loader:
+        inputs = inputs.to(device)
+        labels = labels.to(device)
+
+        # Enable gradient tracking if only in train
+        torch.set_grad_enabled(False)
+
+        # Forward pass
+        outputs = model(inputs)
+        _, preds = torch.max(outputs, 1)
+
+        # Calculate total correct predictions
+        running_corrects += torch.sum(preds == labels.data)
+
+    epoch_acc = 100*running_corrects.double() / dataset_size
+
+    return epoch_acc
