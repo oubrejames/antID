@@ -9,12 +9,15 @@ Given a path to a folder containing images, create a csv file containing the ima
 """
 
 ########## Parameters ##########
+dataset_idx = 3
+all_datasets = ['ant_face_data', 'unseen_data', 'ant_body_data', 'unseen_body_data']
+dataset_to_format = all_datasets[dataset_idx]
 
-path_to_labeled_images = "../labeled_images"
-path_to_dataset = "../ant_face_data"
-# path_to_dataset = "../unseen_data"
-# path_to_labeled_images = "../unseen_images"
+image_folders = ['labeled_images', 'unseen_images', 'labeled_images_bodies', 'unseen_body_imgs']
+image_folder_to_use = image_folders[dataset_idx]
 
+path_to_labeled_images = "../" + 
+path_to_dataset = "../" + dataset_to_format
 ################################
 
 # Create dataset folder
