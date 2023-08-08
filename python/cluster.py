@@ -3,16 +3,16 @@ from datasets import AntsDataset
 import torch
 import torch.nn as nn
 from torchvision import transforms
-from networks import TripletNet, EmbeddingNet, FaceNet
+from networks import TripletNet, EmbeddingNet, FaceNet, EN2, EN4
 import matplotlib.pyplot as plt
 import numpy as np
 
 ######### PARAMETERS #########
-embedding_network = EmbeddingNet()
+embedding_network = EN4()
 batch_size = 100
-model_number = 22
-gpu_id = "cuda:1"
-threshold = 2.5
+model_number = 46
+gpu_id = "cuda:0"
+threshold = 10
 gpu_parallel = False
 ##############################
 
@@ -44,8 +44,8 @@ model.load_state_dict(torch.load(trained_model_path, map_location=device))
 model.eval()
 
 # Declare array to hold embeddings
-embeddings = []
-list_of_original_labels = []
+all_embeddings = []
+original_labels = []
 
 # Loop through all images in the dataset and get the embeddings
 for images, labels in unseen_test_loader:
@@ -56,60 +56,80 @@ for images, labels in unseen_test_loader:
     for i, embedding in enumerate(batch_of_embeddings):
         # image = images[i].unsqueeze(0)
         label = labels[i]
-        embeddings.append(embedding.detach().cpu().numpy())
-        list_of_original_labels.append(label)
+        all_embeddings.append(embedding.detach().cpu().numpy())
+        original_labels.append(label)
 
 print("Created embedding array...")
 
-
-ant_ids = []
-for label in list_of_original_labels:
+# TODO combine this above and take out origianl labels
+og_ant_ids = []
+for label in original_labels:
     # Extract label number
     ant_id = label.split("_")[-1]
-    ant_ids.append(int(ant_id))
+    og_ant_ids.append(int(ant_id))
 
-clusters = []
-classes = []
+clustered_class_embeddings = []
+clustered_classes = []
 # Loop through each embedding
-for i in range(len(embeddings)):
-    emb = embeddings[i]
-    positives = []
-    pos_dists = []
+for i in range(len(all_embeddings)):
+    current_embedding = all_embeddings[i]
+    cluster_matches_idxs = []
+    match_distances = []
     match_count = 0
 
     # Compare emb against every cluster embedding
-    for j in range(len(clusters)):
-        if i == j:
-            continue
+    for j in range(len(clustered_class_embeddings)):
 
-        test_emb = clusters[j]
-        dist = np.linalg.norm(emb - test_emb, ord=2)
-
+        cluster_emb_to_test = clustered_class_embeddings[j]
+        # dist = np.linalg.norm(current_embedding - cluster_emb_to_test, ord=2)
+        dist = torch.linalg.vector_norm(torch.tensor(current_embedding - cluster_emb_to_test))**2
+        # print(dist)
         if dist < threshold:
             match_count += 1
-            positives.append(j)
-            pos_dists.append(dist)
-    
+            cluster_matches_idxs.append(j)
+            match_distances.append(dist)
+
     # If no match make a cluster
     if match_count == 0:
-        clusters.append(embeddings[i])
-        classes.append(len(clusters))
+        clustered_class_embeddings.append(all_embeddings[i])
+        clustered_classes.append(len(clustered_class_embeddings)-1)
         continue
     
     # Loop through all positive matches and choose best one
     smallest_dist = 9999999
-    for p in range(len(positives)):
-        if pos_dists[p] < smallest_dist:
-            smallest_dist = pos_dists[p]
-            best_match = positives[p] # positives[p] is the cluster index of best match
+    for p in range(len(cluster_matches_idxs)):
+        if match_distances[p] < smallest_dist:
+            smallest_dist = match_distances[p]
+            best_match_idx = cluster_matches_idxs[p]
     
     # Average cluster embedding together
-    clusters[best_match] = (clusters[best_match] + emb)/2
+    clustered_class_embeddings[best_match_idx] = (clustered_class_embeddings[best_match_idx] + current_embedding)/2
     
     # Add class to list
-    classes.append(best_match)
+    clustered_classes.append(best_match_idx)
 
-plt.scatter(ant_ids, classes)
+# heat_map = np.zeros((len(clustered_classes), len(og_ant_ids), 1))
+# for i in range(len(clustered_classes)):
+#     for j in range(len(og_ant_ids)):
+print("Number of cluster classes: ", len(clustered_class_embeddings))
+distribution = []
+for i in range(len(clustered_class_embeddings)):
+    class_id = i + 1
+    actual_ids_for_predicted_class = []
+    for elm_idx, elm in enumerate(clustered_classes):
+        if elm != class_id: # Purpose of this is to loop through only 1 of the predicted class labels at a time
+            continue
+        corresponding_ant_id = og_ant_ids[elm_idx]
+        actual_ids_for_predicted_class.append(corresponding_ant_id)
+    distribution.append([class_id, actual_ids_for_predicted_class])
+
+
+
+print(clustered_classes)
+for i in range(len(clustered_classes)):
+    print(clustered_classes[i]," : ", og_ant_ids[i])
+
+plt.scatter(og_ant_ids, clustered_classes)
 plt.savefig('scatter.png')
 
 
@@ -127,31 +147,31 @@ plt.savefig('scatter.png')
 
 # from sklearn.cluster import KMeans
 
-# kmeans = KMeans(n_clusters=10, random_state=0, n_init="auto").fit(embeddings)
+# kmeans = KMeans(n_clustered_class_embeddings=10, random_state=0, n_init="auto").fit(embeddings)
 # kmeans.labels_
 
 # # Plot histogram of predicted labels
 # # plt.hist(kmeans.labels_)
 # # plt.savefig('kmeans.png')
 
-# ant_ids = []
-# for label in list_of_original_labels:
+# og_ant_ids = []
+# for label in original_labels:
 #     # Extract label number
 #     ant_id = label.split("_")[-1]
-#     ant_ids.append(int(ant_id))
+#     og_ant_ids.append(int(ant_id))
 
-# # bins=np.arange(min(ant_ids), max(ant_ids) + 2, 1)
-# # plt.hist(ant_ids, bins = bins)
+# # bins=np.arange(min(og_ant_ids), max(og_ant_ids) + 2, 1)
+# # plt.hist(og_ant_ids, bins = bins)
 # # plt.savefig('labels_hist.png')
 
 
-# classes_and_labels = []
+# clustered_classes_and_labels = []
 # # Loop through all embeddings and save a list that is [predicted class, embedding]
 # for i in range(len(embeddings)):
-#     classes_and_labels.append([kmeans.labels_[i], ant_ids[i]])
+#     clustered_classes_and_labels.append([kmeans.labels_[i], og_ant_ids[i]])
 
-# plt.scatter(ant_ids, kmeans.labels_)
+# plt.scatter(og_ant_ids, kmeans.labels_)
 # plt.savefig('scatter.png')\
 
-# for i in range(len(classes_and_labels)):
-#     print(classes_and_labels[i])
+# for i in range(len(clustered_classes_and_labels)):
+#     print(clustered_classes_and_labels[i])
