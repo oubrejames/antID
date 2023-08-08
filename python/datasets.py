@@ -111,4 +111,4 @@ class AntsDataset(Dataset):
 
         # Get ant id
         ant_id = torch.tensor(int(self.labels.iloc[idx, 0].split("_")[-1]))
-        return anchor_image, ant_id
+        return anchor_image, (self.labels.iloc[idx, 0])
