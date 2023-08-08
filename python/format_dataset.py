@@ -9,7 +9,13 @@ Given a path to a folder containing images, create a csv file containing the ima
 """
 
 ########## Parameters ##########
-dataset_idx = 3
+"""
+Params here are to choose what images you want to create your dataset. I had 4 sets of images to 
+work with: ant faces to train and validate with, unseen ants purely for testing, full ants to train
+and validate with, unseen ant bodies purely for testing.
+"""
+
+dataset_idx = 3 # Change dataset idx to pick what data you want to format
 all_datasets = ['ant_face_data', 'unseen_data', 'ant_body_data', 'unseen_body_data']
 dataset_to_format = all_datasets[dataset_idx]
 
