@@ -7,6 +7,13 @@ from networks import TripletNet, EmbeddingNet, FaceNet, EN2, EN4
 import matplotlib.pyplot as plt
 import numpy as np
 
+"""
+Using the embedding netwrok, this script clusters all ants in the testing set based on their 
+predicted identities. It then tests to see how accuratly ants were predicted in the correct cluster.
+
+TODO Work in progress
+"""
+
 ######### PARAMETERS #########
 embedding_network = EN4()
 batch_size = 100
@@ -24,28 +31,35 @@ data_transforms = transforms.Compose([
                 transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
             ])
 
+
 # Load dataset
 unseen_dir = '../unseen_data'
 unseen_csv = '../unseen_data/labels.csv'
 unseen_dataset = AntsDataset(unseen_csv, unseen_dir, transform=data_transforms)
 unseen_test_loader = torch.utils.data.DataLoader(unseen_dataset, batch_size=100, shuffle=True, num_workers=4)
 
+
 # Load model
 model = TripletNet(embedding_network)
 device = torch.device(gpu_id if torch.cuda.is_available() else "cpu")
 
+
+# Use both GPUs if declared
 if gpu_parallel:
     model = nn.DataParallel(model, device_ids=[0,1]) # Use both GPUs
 model.to(device)
+
 
 # Load trained model and put into evaluation mode
 trained_model_path = '../models/triplet_net_' + str(model_number) + '/best_model.pt'
 model.load_state_dict(torch.load(trained_model_path, map_location=device))
 model.eval()
 
+
 # Declare array to hold embeddings
 all_embeddings = []
 original_labels = []
+
 
 # Loop through all images in the dataset and get the embeddings
 for images, labels in unseen_test_loader:
@@ -61,7 +75,8 @@ for images, labels in unseen_test_loader:
 
 print("Created embedding array...")
 
-# TODO combine this above and take out origianl labels
+
+# TODO combine this above and take out original labels
 og_ant_ids = []
 for label in original_labels:
     # Extract label number
