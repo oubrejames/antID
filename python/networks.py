@@ -252,7 +252,6 @@ class CNN_EN(nn.Module):
     def get_embedding(self, x):
         return self.forward(x)
 
-
 class EN4(nn.Module):
     def __init__(self):
         super(EN4, self).__init__()
@@ -263,7 +262,8 @@ class EN4(nn.Module):
                                      nn.Conv2d(64, 64, 9),
                                      nn.MaxPool2d(2, stride=2))
 
-        self.fc = nn.Sequential(nn.Linear(102400 , 256), #518400
+        self.fc = nn.Sequential(nn.Linear(102400, 256), #for bigger imgs
+                                # nn.Linear(48256  , 256), #518400 102400
                                 nn.PReLU(),
                                 nn.Dropout(p=0.2),
                                 nn.Linear(256, 256),
@@ -294,7 +294,7 @@ class EN5(nn.Module):
                                      nn.Conv2d(64, 64, 9),
                                      nn.MaxPool2d(2, stride=2))
 
-        self.fc = nn.Sequential(nn.Linear(102400 , 256), #518400
+        self.fc = nn.Sequential(nn.Linear(48256 , 256), #518400
                                 nn.PReLU(),
                                 nn.Dropout(p=0.2),
                                 nn.Linear(256, 128)
@@ -308,3 +308,78 @@ class EN5(nn.Module):
 
     def get_embedding(self, x):
         return self.forward(x)
+
+class EN6(nn.Module):
+    def __init__(self):
+        super(EN6, self).__init__()
+        self.convnet = nn.Sequential(nn.Conv2d(3, 32, 7), nn.PReLU(),
+                                     nn.MaxPool2d(2, stride=2),
+                                     nn.Conv2d(32, 64, 9), nn.PReLU(),
+                                     nn.MaxPool2d(2, stride=2),
+                                     nn.Conv2d(64, 64, 11),
+                                     nn.MaxPool2d(2, stride=2))
+
+        self.fc = nn.Sequential(nn.Linear(39424   , 256), #518400 102400
+                                nn.PReLU(),
+                                nn.Dropout(p=0.2),
+                                nn.Linear(256, 256),
+                                nn.PReLU(),
+                                nn.Dropout(p=0.2),
+                                nn.Linear(256, 128),
+                                nn.PReLU(),
+                                nn.Dropout(p=0.2),
+                                nn.Linear(128, 128)
+                                )
+
+    def forward(self, x):
+        output = self.convnet(x)
+        output = output.view(output.size()[0], -1)
+        output = self.fc(output)
+        return output
+
+    def get_embedding(self, x):
+        return self.forward(x)
+
+class AntEmbeddingNet(nn.Module):
+    def __init__(self):
+        super(AntEmbeddingNet, self).__init__()
+        
+        # Define the architecture
+        self.conv_block = nn.Sequential(
+            nn.Conv2d(3, 32, kernel_size=5, stride=2, padding=2),
+            nn.BatchNorm2d(32),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
+            
+            nn.Conv2d(32, 64, kernel_size=5, stride=2, padding=2),
+            nn.BatchNorm2d(64),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
+            
+            nn.Conv2d(64, 128, kernel_size=5, stride=2, padding=2),
+            nn.BatchNorm2d(128),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
+            
+            nn.Conv2d(128, 256, kernel_size=5, stride=2, padding=2),
+            nn.BatchNorm2d(256),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
+        )
+        
+        self.fc_block = nn.Sequential(
+            # nn.Linear(256 * 28 * 10, 512),
+            nn.Linear(2048, 512),
+            nn.ReLU(inplace=True),
+            nn.Dropout(0.5),
+            nn.Linear(512, 256),
+            nn.ReLU(inplace=True),
+            nn.Dropout(0.5),
+            nn.Linear(256, 128),
+        )
+        
+    def forward(self, x):
+        x = self.conv_block(x)
+        x = x.view(x.size(0), -1)  # Flatten the tensor
+        x = self.fc_block(x)
+        return x

@@ -5,7 +5,7 @@ import os
 from tempfile import TemporaryDirectory
 import csv
 
-# EarlyStopper copied from https://stackoverflow.com/questions/71998978/early-stopping-in-pytorch
+# EarlyStopper modified from https://stackoverflow.com/questions/71998978/early-stopping-in-pytorch
 class EarlyStopper:
     """Early stops the training if validation loss doesn't improve after a given patience.
     """
@@ -15,6 +15,7 @@ class EarlyStopper:
         self.min_delta = min_delta
         self.counter = 0
         self.min_validation_loss = np.inf
+        self.max_accuracy = -np.inf
 
     def early_stop(self, validation_loss):
         """Early stops the training if validation loss doesn't improve after a given patience.
@@ -30,6 +31,25 @@ class EarlyStopper:
             self.min_validation_loss = validation_loss
             self.counter = 0
         elif validation_loss >= (self.min_validation_loss + self.min_delta):
+            self.counter += 1
+            if self.counter >= self.patience:
+                return True
+        return False
+
+    def early_stop_acc(self, accuracy):
+        """Early stops the training if validation loss doesn't improve after a given patience.
+
+        Args:
+            accuracy (float): accuracy of model.
+
+        Returns:
+            bool: Whether the training should be stopped or not
+        """
+    
+        if accuracy > self.max_accuracy:
+            self.max_accuracy = accuracy
+            self.counter = 0
+        elif accuracy <= (self.max_accuracy + self.min_delta):
             self.counter += 1
             if self.counter >= self.patience:
                 return True
@@ -176,7 +196,7 @@ def fit(model, dataloaders, criterion, optimizer, scheduler, device, num_epochs=
             val_loss, val_acc = validate_one_epoch(model, dataloaders['val'], optimizer, criterion, device)
             # print('Training Loss: {:.4f} Acc: {:.4f}'.format(train_loss, train_acc))
             # print('Validation Loss: {:.4f} Acc: {:.4f}'.format(val_loss, val_acc))
-            print('Training Loss:  Acc: ', train_loss, train_acc[0])
+            print('Training Loss: ', train_loss, 'Acc: ', train_acc[0])
             print('Validation Loss:  Acc: '.format(val_loss, val_acc))
 
             # Update best validation accuracy

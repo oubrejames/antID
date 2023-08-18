@@ -1,5 +1,6 @@
 import torch
 import matplotlib.pyplot as plt
+from trainer import EarlyStopper
 
 def test_model(model, test_loader, device, threshold):
     """
@@ -158,6 +159,8 @@ def test_thresholds(model, test_loader, device, path_to_folder):
     number_of_thresholds_tested = 0
     data_count = 0
 
+    early_stopper = EarlyStopper(patience=4, min_delta=0.0)
+
     while number_of_thresholds_tested <= number_of_thresholds_to_try:
         # Loop through all images in test_loader
         for anchors, positives, negatives, labels in test_loader: # Loads the batches
@@ -249,6 +252,11 @@ def test_thresholds(model, test_loader, device, path_to_folder):
 
             print("------------------------------------------------------------------- \n")
             number_of_thresholds_tested += 1
+            
+            print("early stop count: ", early_stopper.counter)
+            if early_stopper.early_stop_acc(accuracy):
+                print("Stopping early. Best accuracy did not improve for 4 thresholds.")
+                break
         else:
             threshold = 0.8*float(average_pos_dist)
             threshold_increment = (1.2*average_neg_dist - 0.8*average_pos_dist) / number_of_thresholds_to_try
@@ -279,7 +287,17 @@ def test_thresholds(model, test_loader, device, path_to_folder):
     return best_threshold, best_accuracy
 
 def test_classifier(model, data_loader, device):
-    """TODO
+    """
+    Tests CNN Classifier
+
+    Args:
+        model (nn.Module): ant face recognition model
+        test_loader (torch.utils.data.DataLoader): train dataloader
+        device (torch.device): GPU or CPU
+        threshold (float): threshold to determine if two images are the same
+
+    Returns:
+        None
     """
 
     # Get dataset size
@@ -309,3 +327,166 @@ def test_classifier(model, data_loader, device):
     epoch_acc = 100*running_corrects.double() / dataset_size
 
     return epoch_acc
+
+def test_with_voting(model, test_loader, device, threshold):
+    """
+    Tests embedding network by looping through every image and comparing it every image in an
+    individual pass. Using majority rule, predictions are made as same or different depending on how
+    many images in the pass predict same/different.
+
+    Args:
+        model (nn.Module): ant face recognition model
+        test_loader (torch.utils.data.DataLoader): train dataloader
+        device (torch.device): GPU or CPU
+        threshold (float): threshold to determine if two images are the same
+
+    Returns:
+        None
+    """
+
+    # Load model to device
+    model = model.to(device)
+
+    # Initialize counts for metrics
+    true_positives_count = 0
+    true_negatives_count = 0
+    false_positives_count = 0
+    false_negatives_count = 0
+    total_img_count = 0
+    tested_count = 0
+
+    # Variables to calculate average distance
+    total_neg_dist= 0
+    total_pos_dist = 0
+    num_imgs_per_epoch = 0
+
+
+    voter_tp_count = 0
+    voter_tn_count = 0
+    voter_fp_count = 0
+    voter_fn_count = 0
+
+
+    # Loop through all images in test_loader
+    for anchors, positives, negatives, labels in test_loader:
+        anchors, positives, negatives = anchors.to(device), positives.to(device), negatives.to(device)
+        # Loop through all individual anchors
+        for i, anchor in enumerate(anchors):
+            anchor_embedding = model.get_embedding(anchors)
+            pos_voter_count = 0
+            positive_embeddings = model.get_embedding(positives[0])
+
+            for positive_embedding in positive_embeddings: # For each corresponding positive list
+                # Calculate the squared L2 distance between each output
+                anchors_positives_dist = torch.linalg.vector_norm(anchor_embedding - positive_embedding)**2
+
+                # Predict if positives and anchors are the same
+                if anchors_positives_dist < threshold:
+                    # Anchors and positve are predicted the same
+                    true_positives_count += 1
+                    pos_voter_count += 1
+                else:
+                    # Anchors and positive are predicted different
+                    false_negatives_count += 1
+                    pos_voter_count -= 1
+
+            if pos_voter_count > 0:
+                voter_tp_count += 1
+            else:
+                voter_fn_count += 1
+
+
+            neg_voter_count = 0
+            negative_embeddings = model.get_embedding(negatives[0])
+            for negative_embedding in negative_embeddings: # For each corresponding negative list
+                # Calculate the squared L2 distance between each output
+                anchors_negatives_dist = torch.linalg.vector_norm(anchor_embedding - negative_embedding)**2
+
+                # Predict if positives and anchors are the same
+                if anchors_negatives_dist > threshold:
+                    # Anchors and negative are predicted the same
+                    true_negatives_count += 1
+                    neg_voter_count += 1
+                else:
+                    # Anchors and positive are predicted different
+                    false_positives_count += 1
+                    neg_voter_count -= 1
+
+            if neg_voter_count > 0:
+                voter_tn_count += 1
+            else:
+                voter_fp_count += 1
+
+
+        total_img_count += 1
+
+
+        # Caclulate metrics for each epoch tested
+        if true_positives_count+false_positives_count:
+            tp_rate = 100*true_positives_count/(true_positives_count+false_positives_count)
+            fp_rate = 100*false_positives_count/(true_positives_count+false_positives_count)
+        else:
+            tp_rate = 0
+            fp_rate = 0
+
+        if true_negatives_count+false_negatives_count:
+            tn_rate = 100*true_negatives_count/(true_negatives_count+false_negatives_count)
+            fn_rate = 100*false_negatives_count/(true_negatives_count+false_negatives_count)
+        else:
+            tn_rate = 0
+            fn_rate = 0
+
+        accuracy = 100*(true_negatives_count+true_positives_count)/(true_negatives_count+\
+                    true_positives_count+false_negatives_count+false_positives_count)
+
+        print("TP Rate after ", tested_count, "epochs: ", tp_rate)
+        print("TN Rate after ", tested_count, "epochs: ", tn_rate)
+        print("FP Rate after ", tested_count, "epochs: ", fp_rate)
+        print("FN Rate after ", tested_count, "epochs: ", fn_rate)
+        print("Accuracy after", tested_count, "epochs: ", accuracy)
+        print("------------------------------------------------------------------- \n")
+
+        # Caclulate metrics for each epoch tested WITH VOTING
+        if voter_tp_count + voter_fp_count:
+            voter_tp_rate = 100*voter_tp_count/(voter_tp_count+voter_fp_count)
+            voter_fp_rate = 100*voter_fp_count/(voter_tp_count+voter_fp_count)
+        else:
+            voter_tp_rate = 0
+            voter_fp_rate = 0
+
+        if voter_tn_count+voter_fn_count:
+            voter_tn_rate = 100*voter_tn_count/(voter_tn_count+voter_fn_count)
+            voter_fn_rate = 100*voter_fn_count/(voter_tn_count+voter_fn_count)
+        else:
+            voter_tn_rate = 0
+            voter_fn_rate = 0
+
+        voter_accuracy = 100*(voter_tn_count+voter_tp_count)/(voter_tn_count+\
+                    voter_tp_count+voter_fn_count+voter_fp_count)
+
+        print("Voter TP Rate after ", tested_count, "epochs: ", voter_tp_rate)
+        print("Voter TN Rate after ", tested_count, "epochs: ", voter_tn_rate)
+        print("Voter FP Rate after ", tested_count, "epochs: ", voter_fp_rate)
+        print("Voter FN Rate after ", tested_count, "epochs: ", voter_fn_rate)
+        print("Voter Accuracy after", tested_count, "epochs: ", voter_accuracy)
+        print("------------------------------------------------------------------- \n")
+        tested_count += 1
+        print("END")
+
+
+    # Print final metrics
+    print("TP Rate Final: ", tp_rate)
+    print("TN Rate Final: ", tn_rate)
+    print("FP Rate Final: ", fp_rate)
+    print("FN Rate Final: ", fn_rate)
+    print("Final Accuracy: ", accuracy)
+    print("Total number of testing images: ", total_img_count)
+
+    # Print final metrics
+    print("Voting TP Rate Final: ", voter_tp_rate)
+    print("Voting TN Rate Final: ", voter_tn_rate)
+    print("Voting FP Rate Final: ", voter_fp_rate)
+    print("Voting FN Rate Final: ", voter_fn_rate)
+    print("Voting Final Accuracy: ", voter_accuracy)
+    print("Voting Total number of testing images: ", total_img_count)
+    return None

@@ -7,19 +7,16 @@ import torch
 Print out the model architecture for the a given model.
 """
 
-# print('Embedding net: \n ----------------------------')
-# model_e = EmbeddingNet()
-# summary(model_e, (3, 375, 375))
+print('Embedding net: \n ----------------------------')
+model_emb = EmbeddingNet()
+summary(model_emb, (3, 375, 375))
 
-# print('\n Triplet net: \n ----------------------------')
+print('\n Printed Model \n --------------------------------')
+print(model_emb)
 
-# model = TripletNet(EmbeddingNet())
-# summary(model,((3, 375, 375), (3, 375, 375), (3, 375, 375)))
+print('\n Triplet net: \n ----------------------------')
+model_trip = TripletNet(EmbeddingNet())
+summary(model_trip,((3, 375, 375), (3, 375, 375), (3, 375, 375)))
 
-# print('\n Printed Model \n --------------------------------')
-# print(model_e)
-
-model = TransferYOLO()
-print(model)
-
-summary(model, (3,375,375))
+print('\n Printed Model \n --------------------------------')
+print(model_trip)

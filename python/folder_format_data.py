@@ -3,10 +3,16 @@ import os
 import shutil
 from sklearn.model_selection import train_test_split
 
-# path_to_labeled_images = "../labeled_images"
-# path_to_dataset = "../folder_dataset"
-path_to_labeled_images = "../labeled_images_bodies"
-path_to_dataset = "../body_folder_dataset"
+######### PARAMETERS #########
+ant_face_flag = False # Choose if using ant face or body data
+##############################
+
+if ant_face_flag:
+    path_to_labeled_images = "../labeled_images"
+    path_to_dataset = "../folder_dataset"
+else:
+    path_to_labeled_images = "../labeled_images_bodies"
+    path_to_dataset = "../body_folder_dataset"
 
 train_dir = os.path.join(path_to_dataset, 'train')
 test_dir = os.path.join(path_to_dataset, 'test')

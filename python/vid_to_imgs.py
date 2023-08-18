@@ -17,18 +17,23 @@ if ant_body_flag:
     model= YOLO("YOLO_Body/runs/detect/yolov8s_v8_25e3/weights/best.pt")
     labelled_image_dir = "../labeled_images_bodies/"
     if unseen_test_flag:
-        labelled_image_dir = "../unseen_body_imgs"
-        videos_directory = "../unseen_vids"
+        labelled_image_dir = "../unseen_body_imgs/"
+        videos_directory = "../unseen_vids/"
 else:
     model= YOLO("YOLO_V8/runs/detect/yolov8s_v8_25e6/weights/best.pt")
     labelled_image_dir = "../labeled_images/"
     if unseen_test_flag:
-        labelled_image_dir = "../unseen_images"
-        videos_directory = "../unseen_vids"
+        labelled_image_dir = "../unseen_images/"
+        videos_directory = "../unseen_vids/"
 
 # Put on GPU 1
-device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 model.to(device)
+
+
+
+
+
 
 def get_head_box(im):
     """Take a video frame and return the bounding box of the ant head if it exists.
@@ -51,6 +56,59 @@ def get_head_box(im):
         x2 = bbox.xyxy[0][2]
         y1 = bbox.xyxy[0][1]
         y2 = bbox.xyxy[0][3]
+        box = [[x1, y1], [x2, y2]]
+        return box
+    else:
+        return None
+
+def get_body_box(im):
+    """Take a video frame and return the bounding box of the ant head if it exists.
+
+    Args:
+        im (CV::MAT): Input image frame
+
+    Returns:
+        list: Two points idescribing the bounding box of the ant head
+    """
+
+    detections = model(im, conf=0.8)
+    bboxes = detections[0].boxes
+    num_detections = bboxes.xyxy.size(dim=0)
+
+    if num_detections > 0:
+        detection = detections[0]
+        bbox = detection.boxes
+        x1 = bbox.xyxy[0][0]
+        x2 = bbox.xyxy[0][2]
+        y1 = bbox.xyxy[0][1]
+        y2 = bbox.xyxy[0][3]
+        center_point = [abs(x2-x1)/2 + x1, abs(y2-y1)/2 + y1]
+
+        x1 = center_point[1] - 1726/2
+        x2 = center_point[1] + 1726/2
+        y1 = center_point[1] - 610/2
+        y2 = center_point[1] + 610/2
+
+        if x1 < 0:
+            difference = - x1
+            x1 += difference
+            x2 += difference
+
+        if x2 > 2048:
+            difference = x2 - 2048
+            x1 -= difference
+            x2 -= difference
+
+        if y1 < 0:
+            difference = - y1
+            y1 += difference
+            y2 += difference
+
+        if y2 > 1536:
+            difference = y2 - 1536
+            y1 -= difference
+            y2 -= difference
+
         box = [[x1, y1], [x2, y2]]
         return box
     else:
@@ -90,18 +148,22 @@ def main():
             ret, frame = cap.read()
             if frame is None:
                 break
-            
-            # Detect ant head
-            head_box = get_head_box(frame)
 
-            if head_box is None:
+            if ant_body_flag:
+                # Detect ant body
+                bbox = get_body_box(frame)
+            else:
+                # Detect ant head
+                bbox = get_head_box(frame)
+
+            if bbox is None:
                 continue
 
             # Crop image to head
-            y1 = int(head_box[0][1])
-            y2 = int(head_box[1][1])
-            x1 = int(head_box[0][0])
-            x2 = int(head_box[1][0])
+            y1 = int(bbox[0][1])
+            y2 = int(bbox[1][1])
+            x1 = int(bbox[0][0])
+            x2 = int(bbox[1][0])
             head_crop_img = frame[y1:y2,x1:x2]
 
             # Get ant label
