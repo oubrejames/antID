@@ -28,9 +28,6 @@ and labelled.
 
 <div align="center"><img src="https://github.com/oubrejames/antID/assets/46512429/eccbc9bd-b9c9-41ef-b49e-66b22ec4af2d" alt="antworld" width="500"/></div>
 
-# Methodology
-Just copy script from video and reword
-
 # Usage Instructions
 _Note: You may have to adjust parameters on separate python scripts to match to ensure proper functionality_
 
@@ -61,11 +58,46 @@ files. The tunable parameters are present at the top of each file.
 * Testing tools are located in the `tester.py` file and to test a model you can run the `test_model.py`
 script. You may have to adjust the parameters at the top of the script. 
 
+
+# Methodology
+
+<p align = "center"><img src="https://github.com/oubrejames/antID/assets/46512429/c10ccb0f-a427-44be-b271-7a9c534163ca" /></p>
+<p align = "center">System Pipeline</p>
+ 
+
+The pipeline was structured as shown above. Videos would be processed using a YOLOV8 model trained to
+detect ants find video frames where an ant was present. With ant images aquired, two different images 
+would be put into the same network, known as Siamese network, and two embeddings would be output. I then 
+obtain the distance between embeddings by calculating norm of the difference and if that norm is 
+above a certain threshold the two ants in the images are different and if it is below, they are the same.
+
+
+The model itself is a convolutional neural network and it outputs a 128 element feature vector. To train 
+it I used a loss function known as triplet loss. Training with triplet loss can be understood intuitively 
+by giving the trainer 3 images at each training step, an anchor, a positive, and a negative. The 
+anchor is an image of any ant, the positive is then a different picture of the same ant, and the negative
+is a picture of a different ant. During training, the model weights will be updated so that the
+distance between anchor and positive embeddings is smaller than the distance between anchor and 
+negative embeddngs.
+
+
+Mathematically this works because the distances between the anchor positive pair minus the anchor 
+negative pair plus some margin must be less than zero. Because the difference between distances must 
+be negative, the anchor negative distance must be larger than the anchor positive distance. The 
+margin is then used to try and push the distances from the anchor to positive and negative embeddings 
+further from each other.
+
+<p align = "center"><img src="https://github.com/oubrejames/antID/assets/46512429/9692bb97-9344-4ca4-9df5-629caa8e4fd8" /></p>
+<p align = "center">Triplet Loss Function</p>
+
+<p align = "center"><img src="https://github.com/oubrejames/antID/assets/46512429/5f83b33c-1a04-4203-a70d-9ffd9ba439ca" /></p>
+<p align = "center">Cost Function with Triplet Loss</p>
+
 # Results
 When using the XXX network the model performed with a recall of ###, precision of ###, and accuracy of 
 XXX on ants that it has seen before in training. On completely unseen ants the acheived recall of ###, precision of ###, and accuracy of 
 XXX. The model was trained on ### images of XXX different ants. It was tested on XXX images of these
 same ants and ### images of XXX different ants for the unseen test.
 
-When using the end-to-end classifer on a closed set of ants a CNN classifier was able to acheive an
+Alternatively, when using the end-to-end classifer on a closed set of ants a CNN classifier was able to acheive an
 accuracy of ###. It was trained on ### images of XXX different ants.
