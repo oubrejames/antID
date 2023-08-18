@@ -26,7 +26,7 @@ recorded for a while before being let into the temporary living area. A new vide
 the `data_collection` script in `antID `. This process is repeated until all ants have been recorded
 and labelled.
 
-<img src="https://github.com/oubrejames/antID/assets/46512429/0387fd0a-4e17-4ccb-9e59-8c364c2ea56e" alt="antworld" width="500"/>
+<div align="center"><img src="https://github.com/oubrejames/antID/assets/46512429/0387fd0a-4e17-4ccb-9e59-8c364c2ea56e" alt="antworld" width="500"/></div>
 
 # Methodology
 Just copy script from video and reword
