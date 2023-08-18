@@ -32,7 +32,7 @@ and labelled.
 Just copy script from video and reword
 
 # Usage Instructions
-_ Note: You may have to adjust parameters on separate python scripts to match to ensure proper functionality_
+_Note: You may have to adjust parameters on separate python scripts to match to ensure proper functionality_
 
 ### Data collection
 * The `collect_data.cpp` file contains the script used to collect data. Allow one ant at a time in the
@@ -62,3 +62,10 @@ files. The tunable parameters are present at the top of each file.
 script. You may have to adjust the parameters at the top of the script. 
 
 # Results
+When using the XXX network the model performed with a recall of ###, precision of ###, and accuracy of 
+XXX on ants that it has seen before in training. On completely unseen ants the acheived recall of ###, precision of ###, and accuracy of 
+XXX. The model was trained on ### images of XXX different ants. It was tested on XXX images of these
+same ants and ### images of XXX different ants for the unseen test.
+
+When using the end-to-end classifer on a closed set of ants a CNN classifier was able to acheive an
+accuracy of ###. It was trained on ### images of XXX different ants.
