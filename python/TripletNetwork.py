@@ -8,7 +8,7 @@ import numpy as np
 from torchvision import transforms
 import os
 from datasets import TripletAntsDataset
-from networks import TripletNet, EmbeddingNet, FaceNet, EN2, TransferYOLO, EN3, CNN_EN, EN4, EN5
+from networks import TripletNet, EmbeddingNet, FaceNet, EN2, TransferYOLO, EN3, CNN_EN, EN4, EN5, EN6, AntEmbeddingNet
 from trainer import fit_triplet
 from tester import test_model
 import shutil
@@ -16,27 +16,31 @@ from plot_loss import plot_loss
 from trainer import EarlyStopper
 import pandas as pd
 import matplotlib.pyplot as plt
+import random
 """
 This script trains a triplet network on the ant face dataset.
 """
 
 ######### PARAMETERS #########
 embedding_network = EN4()
-batch_size = 100
-loss_margin = 1 # 79.4 at 0,7 .... 79.6 at 1 (both with batch of 70) ... 78 for 0.5 bstch 100 ... 77 for 1.5 all behind is for en2
+batch_size = 70
+loss_margin = 1
 loss_p = 2
-learn_rate = 0.0001
+learn_rate = 0.0005
 gpu_id = "cuda:0"
-gpu_parallel = False
+gpu_parallel = True
 scheduler_step_size = 7
 scheduler_gamma = 0.1
 num_epochs = 100
 early_stopper = EarlyStopper(patience=7, min_delta=0.0)
+# data_dir = '../ant_face_data'
+# csv_file = '../ant_face_data/labels.csv'
+# data_dir = '../ant_body_data'
+# csv_file = '../ant_body_data/labels.csv'
+data_dir = '../clean_ant_data'
+csv_file = '../clean_ant_data/labels.csv'
 ##############################
 
-## EN4 Best params (somwhere around 46 is best)
-## Batch 100, margin 1 or 0.7, lr 0.,0001, output layer 128 
-## Batch 100 EN5, margin 1, lr 0.0001, lossp 2
 
 # Enable benchmarking for faster runtime
 cudnn.benchmark = True
@@ -44,21 +48,20 @@ cudnn.benchmark = True
 
 # Resize and normalize the images
 data_transforms = transforms.Compose([
-                transforms.Resize(375),
+                # transforms.Resize((512, 152)),
                 transforms.CenterCrop(375),
                 transforms.ToTensor(),
                 transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
             ])
 
 
-
 # Create dataset
-# data_dir = '../ant_face_data'
-# csv_file = '../ant_face_data/labels.csv'
-data_dir = '../ant_body_data'
-csv_file = '../ant_body_data/labels.csv'
 dataset = TripletAntsDataset(csv_file, data_dir, transform=data_transforms)
 
+# Set random seed for reproducibility of split among different scripts
+torch.manual_seed(0)
+random.seed(0)
+np.random.seed(0)
 
 # Split dataset into train, validation, and test sets
 train_size = int(0.8 * len(dataset))
