@@ -2,16 +2,16 @@ import torch
 import torch.nn as nn
 import torch.backends.cudnn as cudnn
 from torchvision import transforms
-from datasets import TripletAntsDataset, TripletPasses
+from datasets import TripletAntsDataset
 from networks import TripletNet, EmbeddingNet, FaceNet, EN2, CNN_EN, EN4, EN5, EN6, AntEmbeddingNet
-from tester import test_model, test_thresholds, test_with_voting
+from tester import test_model, test_thresholds
 import random
 import numpy as np
 
 ######### PARAMETERS #########
-embedding_network = AntEmbeddingNet()
+embedding_network = EN4()
 batch_size = 70
-model_number = 83
+model_number = 84
 gpu_id = "cuda:0"
 gpu_parallel = True
 test_thresh = True
