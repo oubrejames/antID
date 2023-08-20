@@ -4,12 +4,15 @@ within a population. The purpose of this work to to create a system to help myrm
 by automating the process of identifying ants within a colony. Currently, the legnthy and difficult 
 process of painting ants with different patterns is the norm (https://www.youtube.com/watch?v=uAQ5IKVpysc).
 
-This repository currently consists of 2 packages, `black_fly_tools` and `antID`. 
+This repository currently consists of 2 packages, `black_fly_tools` and `antID`, and a separate `python`
+folder. 
 
 `black_fly_tools` offers code that can be used to easily interface with the Flir Blackfly camera 
 through the Spinnaker SDK.
 
 `antID ` is the main package for performing individual recognition on the ants. 
+
+`python` contains all python code, including all machine learning scripts.
 
 ### Experiment Setup
 Below is a picture of the experiment setup. There are 4 main components to the setup. There are two
