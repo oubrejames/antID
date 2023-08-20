@@ -94,10 +94,6 @@ further from each other.
 <p align = "center">Cost Function with Triplet Loss</p>
 
 # Results
-When using the XXX network the model performed with a recall of ###, precision of ###, and accuracy of 
-XXX on ants that it has seen before in training. On completely unseen ants the acheived recall of ###, precision of ###, and accuracy of 
-XXX. The model was trained on ### images of XXX different ants. It was tested on XXX images of these
-same ants and ### images of XXX different ants for the unseen test.
-
-Alternatively, when using the end-to-end classifer on a closed set of ants a CNN classifier was able to acheive an
-accuracy of ###. It was trained on ### images of XXX different ants.
+The model was tested on two different test sets. One contained 2,357 different images of 45 ants that the model had seen in training and the other had 3,687 images of 10 unseen ants. On the dataset of previously
+seen ants, the model achieved a true positive rate of 95.21%, a true negative rate of 99.6% and an accuracy
+of 97.3%. On the dataset of unseen ants, the model achieved a true positive rate of 80.67%, a true negative rate of 93.68% and an accuracy of 86.04%. Accuracy here is defined as the number of true positives plus the number of true negative over the total number of predictions. 
