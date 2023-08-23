@@ -262,8 +262,8 @@ class EN4(nn.Module):
                                      nn.Conv2d(64, 64, 9),
                                      nn.MaxPool2d(2, stride=2))
 
-        self.fc = nn.Sequential(nn.Linear(102400, 256), #for bigger imgs
-                                # nn.Linear(48256  , 256), #518400 102400
+        self.fc = nn.Sequential(#nn.Linear(102400, 256), #for bigger imgs
+                                nn.Linear(48256  , 256), #518400 102400
                                 nn.PReLU(),
                                 nn.Dropout(p=0.2),
                                 nn.Linear(256, 256),

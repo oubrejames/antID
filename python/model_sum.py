@@ -1,6 +1,6 @@
 from torchvision import models
 from torchsummary import summary
-from networks import TripletNet, EmbeddingNet, TransferYOLO
+from networks import TripletNet, EmbeddingNet, TransferYOLO, EN4
 from ultralytics import YOLO
 import torch
 """
@@ -20,3 +20,10 @@ summary(model_trip,((3, 375, 375), (3, 375, 375), (3, 375, 375)))
 
 print('\n Printed Model \n --------------------------------')
 print(model_trip)
+
+print('EN4: \n ----------------------------')
+model_emb = EN4()
+summary(model_emb, (3, 512, 152))
+
+print('\n Printed Model \n --------------------------------')
+print(model_emb)

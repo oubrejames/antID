@@ -10,14 +10,14 @@ import numpy as np
 
 ######### PARAMETERS #########
 embedding_network = EN4()
-batch_size = 70
-model_number = 84
+batch_size = 100
+model_number = 86
 gpu_id = "cuda:0"
 gpu_parallel = True
 test_thresh = True
 body_flag = True
 if not test_thresh:
-    best_threshold = 0.2
+    best_threshold = 0.25
 ##############################
 
 # Enable benchmarking for faster runtime
@@ -26,20 +26,23 @@ cudnn.benchmark = True
 
 # Resize and normalize the images
 data_transforms = transforms.Compose([
+                # transforms.Resize(375),
                 # transforms.CenterCrop(375),
+                transforms.Resize((512, 152)),
                 transforms.ToTensor(),
                 transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
             ])
 
-
 # Choose correct dataset based on using body or not
 if body_flag:
-    # unseen_dir = '../unseen_body_data'
-    # unseen_csv = '../unseen_body_data/labels.csv'
+    # unseen_dir = '../unseen_body_data_og_crop'
+    # unseen_csv = '../unseen_body_data_og_crop/labels.csv'
+    # seen_dir =  '../ant_body_data_og_crop'
+    # seen_csv = '../ant_body_data_og_crop/labels.csv'
     unseen_dir = '../unseen_clean_data'
     unseen_csv = '../unseen_clean_data/labels.csv'
-    seen_dir = '../ant_body_data'
-    seen_csv = '../ant_body_data/labels.csv'
+    seen_dir = '../clean_ant_data'
+    seen_csv = '../clean_ant_data/labels.csv'
     model_folder = '../models/triplet_net_body_'
 else:
     unseen_dir = '../unseen_data'
@@ -69,7 +72,10 @@ train_size = int(0.8 * len(seen_dataset))
 val_size = int(0.1 * len(seen_dataset))
 test_size = len(seen_dataset) - train_size - val_size
 train_set, val_set, test_set = torch.utils.data.random_split(seen_dataset, [train_size, val_size, test_size])
-
+print("test size: ", test_size)
+print("train size: ", train_size)
+print("val size: ", val_size)
+print("Total size: ", len(seen_dataset))
 
 # Create dataloaders
 train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=4)

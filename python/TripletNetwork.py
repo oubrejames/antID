@@ -23,9 +23,9 @@ This script trains a triplet network on the ant face dataset.
 
 ######### PARAMETERS #########
 embedding_network = EN4()
-batch_size = 70
+batch_size = 200
 loss_margin = 1
-loss_p = 2
+loss_p = 1
 learn_rate = 0.0005
 gpu_id = "cuda:0"
 gpu_parallel = True
@@ -33,10 +33,6 @@ scheduler_step_size = 7
 scheduler_gamma = 0.1
 num_epochs = 100
 early_stopper = EarlyStopper(patience=7, min_delta=0.0)
-# data_dir = '../ant_face_data'
-# csv_file = '../ant_face_data/labels.csv'
-# data_dir = '../ant_body_data'
-# csv_file = '../ant_body_data/labels.csv'
 data_dir = '../clean_ant_data'
 csv_file = '../clean_ant_data/labels.csv'
 ##############################
@@ -45,11 +41,11 @@ csv_file = '../clean_ant_data/labels.csv'
 # Enable benchmarking for faster runtime
 cudnn.benchmark = True
 
-
 # Resize and normalize the images
 data_transforms = transforms.Compose([
-                transforms.Resize(375),
-                transforms.CenterCrop(375),
+                # transforms.Resize(375),
+                # transforms.CenterCrop(375),
+                transforms.Resize((512, 152)),
                 transforms.ToTensor(),
                 transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
             ])
@@ -80,7 +76,7 @@ dataloaders = {'train': train_loader, 'val': val_loader, 'test': test_loader}
 # Create model, loss function, optimizer, and scheduler
 model = TripletNet(embedding_network)
 loss_func = nn.TripletMarginLoss(margin=loss_margin, p=loss_p)
-optimizer = optim.Adam(model.parameters(), lr=learn_rate)
+optimizer = optim.Adam(model.parameters(), lr=learn_rate, weight_decay = 0.0001)
 device = torch.device(gpu_id if torch.cuda.is_available() else "cpu")
 
 if gpu_parallel:

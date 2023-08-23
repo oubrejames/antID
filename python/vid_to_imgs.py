@@ -9,7 +9,7 @@ import torch
 ant_body_flag = True
 
 # Flag for if you are adding to the unseen dataset for testing
-unseen_test_flag = False
+unseen_test_flag = True
 
 # Import yolo model and choose correct directories for images and videos
 videos_directory = "../labeled_vids"
@@ -17,7 +17,7 @@ if ant_body_flag:
     model= YOLO("YOLO_Body/runs/detect/yolov8s_v8_25e3/weights/best.pt")
     labelled_image_dir = "../labeled_images_bodies/"
     if unseen_test_flag:
-        labelled_image_dir = "../unseen_body_imgs/"
+        labelled_image_dir = "../unseen_body_imgs_bad_crop/"
         videos_directory = "../unseen_vids/"
 else:
     model= YOLO("YOLO_V8/runs/detect/yolov8s_v8_25e6/weights/best.pt")
@@ -151,7 +151,7 @@ def main():
 
             if ant_body_flag:
                 # Detect ant body
-                bbox = get_body_box(frame)
+                bbox = get_head_box(frame) # TODO revert this back
             else:
                 # Detect ant head
                 bbox = get_head_box(frame)

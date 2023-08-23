@@ -17,10 +17,10 @@ and validate with, unseen ant bodies purely for testing.
 
 dataset_idx = 3 # Change dataset idx to pick what data you want to format
 all_datasets = ['ant_face_data', 'unseen_data', 'ant_body_data', 'unseen_body_data', 'clean_ant_data']
-dataset_to_format = all_datasets[dataset_idx]
+dataset_to_format = 'unseen_body_data_og_crop'#all_datasets[dataset_idx]
 
 image_folders = ['labeled_images', 'unseen_images', 'labeled_images_bodies', 'unseen_body_imgs', 'ant_body_imgs_clean']
-image_folder_to_use = image_folders[dataset_idx]
+image_folder_to_use = 'unseen_body_imgs_og_crop' #image_folders[dataset_idx]
 
 path_to_labeled_images = "../" + image_folder_to_use
 path_to_dataset = "../" + dataset_to_format
