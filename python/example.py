@@ -176,6 +176,7 @@ while(1):
     if frame is None:
         break
 
+    # Detect if ant is in frame
     bbox = get_body_box(frame, model = yolo_model)
 
     if bbox is None:
