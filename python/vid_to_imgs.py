@@ -61,7 +61,7 @@ def get_head_box(im):
     else:
         return None
 
-def get_body_box(im, model = model):
+def get_bbox(im, model = model):
     """Take a video frame and return the bounding box of the ant head if it exists.
 
     Args:
@@ -151,7 +151,7 @@ def main():
 
             if ant_body_flag:
                 # Detect ant body
-                bbox = get_head_box(frame) # TODO revert this back
+                bbox = get_bbox(frame) # TODO revert this back
             else:
                 # Detect ant head
                 bbox = get_head_box(frame)

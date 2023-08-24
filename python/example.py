@@ -7,7 +7,7 @@ from networks import TripletNet, EN4
 import torch
 import torch.nn as nn
 from torchvision import transforms
-from vid_to_imgs import get_body_box
+from vid_to_imgs import get_bbox
 from ultralytics import YOLO
 import csv
 import cv2
@@ -177,7 +177,7 @@ while(1):
         break
 
     # Detect if ant is in frame
-    bbox = get_body_box(frame, model = yolo_model)
+    bbox = get_bbox(frame, model = yolo_model)
 
     if bbox is None:
         continue
