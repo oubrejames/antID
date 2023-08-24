@@ -22,7 +22,18 @@ model_folder = '../models/triplet_net_body_'
 ##############################
 
 class AntPredictor():
+    """Class to use ease the use of the triplet network for predicting if two images are the same ant.
+    """
     def __init__(self, model, weights_path, device, threshold, gpu_parallel = True, img_resize_dim = (512, 152)):
+        """
+        Args:
+            model (nn.Module): Model to use for prediction (Tripletnet())
+            weights_path (string): path to trained weights
+            device (torch.device): GPU to work on
+            threshold (float): threshold for deciding if two images are the same ant
+            gpu_parallel (bool, optional): Flag for if the model was trained on 2 GPUs. Defaults to True.
+            img_resize_dim (tuple, optional): Size to resize images to. Defaults to (512, 152).
+        """
         self.model = model
         self.device = device
 
@@ -55,6 +66,15 @@ class AntPredictor():
 
 
     def predict(self, image1, image2):
+        """Take in two images and predict if they are the same ant.
+
+        Args:
+            image1 (np.array): image 1
+            image2 (np.array): image 2
+
+        Returns:
+            True for same ant, False for different ant
+        """
         # Convert to PIL image
         image1 = Image.fromarray(image1)
         image2 = Image.fromarray(image2)
@@ -68,6 +88,14 @@ class AntPredictor():
         return predict_embedding(embd1, embd2)
 
     def get_embedding(self, image1):
+        """Return embedding for image
+
+        Args:
+            image1 (np.array): image to get embedding for
+
+        Returns:
+            tensor: embedding for image
+        """
         image1 = Image.fromarray(image1)
 
         image1 = self.data_transforms(image1)
@@ -81,6 +109,15 @@ class AntPredictor():
         return embd1
     
     def predict_embedding(self, embd1, embd2):
+        """Predict if two embeddings are the same ant
+
+        Args:
+            embd1 (tensor): embedding 1
+            embd2 (tensor): embedding 2
+
+        Returns:
+            True for same ant, False for different ant
+        """
         # Calculate the squared L2 distance between each output
         distance = torch.linalg.vector_norm(embd1 - embd2)**2
 
@@ -91,6 +128,15 @@ class AntPredictor():
             return False
 
 def calc_timestep(frame_number, fps):
+    """Calulate the timestep for a given frame
+
+    Args:
+        frame_number (int): order of frame in video
+        fps (int): frames per second of video
+
+    Returns:
+        float: timestep of frame
+    """
     # s = f / fps
     return frame_number/fps
 
