@@ -100,3 +100,22 @@ further from each other.
 The model was tested on two different test sets. One contained 2,357 different images of 45 ants that the model had seen in training and the other had 3,687 images of 10 unseen ants. On the dataset of previously
 seen ants, the model achieved a true positive rate of 95.21%, a true negative rate of 99.6% and an accuracy
 of 97.3%. On the dataset of unseen ants, the model achieved a true positive rate of 80.67%, a true negative rate of 93.68% and an accuracy of 86.04%. Accuracy here is defined as the number of true positives plus the number of true negative over the total number of predictions. 
+
+# Using the model
+To use the model, download the dataset and model weights from <a href="https://drive.google.com/drive/folders/1IdkzqJttv8UfrybvgaZVlwL1lh68mWAv?usp=sharing">here</a>.
+An example of using the model is present in the python folder under `example.py`. A typical pipeline consists of two main steps to utilize the model. For each frame you need to apply the YOLO detection model and see if there are ants in the frame. This can be done using the `get_bbox()` function and passing it the image and pretrained
+YOLO network. The YOLO model weights and the dataset it was trained on can be found <a href="https://drive.google.com/drive/folders/1IdkzqJttv8UfrybvgaZVlwL1lh68mWAv?usp=sharing">here</a>.
+
+If an ant is detected, the `AntPredictor` class can be used to compare two images of ants and predict
+if they are the same or different.
+
+### Steps to using YOLO ant detector
+* Instantiate YOLO model `yolo_model = YOLO(<path to trained weights>)`
+* Pass model with image into `get_bbox()` `bbox = get_bbox(frame, model = yolo_model)`
+* This will return `None` if no ant is detected and the bounding box of the ant if one is detected
+
+### Steps to using AntPredictor
+* Instantiate class object `predictor = AntPredictor(model, trained_model_path, device, threshold)`
+* Test two images: `predictor.predict(image1, image2)`
+* Test two embeddings: `predictor.predict_embedding(embd1, embd1)`
+* Obtain one embedding: `predictor.get_embedding(image)`
