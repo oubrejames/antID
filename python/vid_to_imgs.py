@@ -61,7 +61,7 @@ def get_head_box(im):
     else:
         return None
 
-def get_body_box(im):
+def get_body_box(im, model = model):
     """Take a video frame and return the bounding box of the ant head if it exists.
 
     Args:
