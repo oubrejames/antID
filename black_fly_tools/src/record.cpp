@@ -10,8 +10,20 @@ int main(){
     bfc::BlackFlyCamera camera;
     std::cout << "Camera object created" << std::endl;
 
-    // Set exposure time
+    // Set exposure manually
     camera.set_exposure_time(2000.0);
+
+    // Set gain to auto
+    // camera.set_auto_gain("Continuous");
+
+    // Set gain manually
+    camera.set_gain(20.0);
+
+    // Enable gamma correction
+    camera.enable_gamma(true);
+
+    /// Set gamma correction
+    camera.set_gamma(0.5);
 
     // Begin aquiring frames
     camera.begin_acquisition();

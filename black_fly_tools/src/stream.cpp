@@ -14,19 +14,22 @@ int main(){
     camera.set_auto_exposure("Continuous");
 
     // Set exposure manually
-    // camera.set_exposure_time(1000.0);
+    // camera.set_exposure_time(10000.0);
 
     // Set gain to auto
     // camera.set_auto_gain("Continuous");
 
     // Set gain manually
-    camera.set_gain(15.0);
+    camera.set_gain(20.0);
 
     // Enable gamma correction
     camera.enable_gamma(true);
 
     /// Set gamma correction
     camera.set_gamma(0.5);
+
+    // Manually set gain
+    camera.set_gain(20.0);
 
     // Begin aquiring frames
     camera.begin_acquisition();
