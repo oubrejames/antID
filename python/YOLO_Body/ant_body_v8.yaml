@@ -1,0 +1,7 @@
+path: /home/oubre/antID/python/YOLO_Body/datasets/ant_bodies
+train: 'train/images'
+val: 'valid/images'
+ 
+# class names
+names: 
+  0: 'ant-body'
